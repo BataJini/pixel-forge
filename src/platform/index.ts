@@ -6,6 +6,23 @@
 export const PLATFORM_MODULE = 'pixel-forge/platform' as const;
 
 export {
+  bufferToPngBlob,
+  bufferToSvgBlob,
+  type ExportPngRequest,
+  type ExportSvgRequest,
+  exportPngFile,
+  exportSvgFile,
+  fileSaveSupported,
+  PNG_SCALES,
+  type PngEncodeOptions,
+  type PngScale,
+  type SaveOptions,
+  type SaveOutcome,
+  sanitizeFileName,
+  saveBlob,
+  withExtension,
+} from './exporters';
+export {
   CHECKER_COLORS,
   drawCheckerboard,
   drawPixelGrid,

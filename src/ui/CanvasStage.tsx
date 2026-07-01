@@ -13,6 +13,7 @@ import {
 } from '../core';
 import { createRenderer, type PixelRenderer } from '../platform';
 import './CanvasStage.css';
+import { ExportDialog } from './export';
 
 const ART_W = 32;
 const ART_H = 32;
@@ -151,6 +152,7 @@ export function CanvasStage() {
   const [paintIndex, setPaintIndex] = useState(0);
   const [erasing, setErasing] = useState(false);
   const [gridOn, setGridOn] = useState(true);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const colorRef = useRef<RGBA>(PAINTS[0].rgba);
   colorRef.current = erasing ? TRANSPARENT : PAINTS[paintIndex].rgba;
@@ -298,6 +300,14 @@ export function CanvasStage() {
         >
           Grid
         </button>
+        <button
+          type="button"
+          className="pf-btn"
+          aria-haspopup="dialog"
+          onClick={() => setExportOpen(true)}
+        >
+          Export…
+        </button>
       </div>
 
       <div ref={wellRef} className="pf-stage__well">
@@ -326,6 +336,13 @@ export function CanvasStage() {
           Tool <b>{erasing ? 'Eraser' : 'Pencil'}</b>
         </span>
       </p>
+
+      <ExportDialog
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        getSource={() => bufferRef.current}
+        title="pixelforge"
+      />
     </section>
   );
 }
