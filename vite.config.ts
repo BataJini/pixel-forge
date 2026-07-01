@@ -36,6 +36,7 @@ export default defineConfig({
       'src/**/*.test.{ts,tsx}',
       'test/**/*.test.{ts,tsx}',
       'docs/acceptance/U-003/**/*.test.{ts,tsx}',
+      'docs/acceptance/U-005/**/*.test.{ts,tsx}',
     ],
     exclude: ['**/node_modules/**', '**/dist/**', 'e2e/**', '**/*.browser.test.{ts,tsx}'],
     coverage: {

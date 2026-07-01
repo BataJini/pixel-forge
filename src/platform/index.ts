@@ -6,11 +6,17 @@
 export const PLATFORM_MODULE = 'pixel-forge/platform' as const;
 
 export {
+  downloadText,
+  paletteFormatFromFilename,
+  readTextFile,
+} from './files';
+export {
   CHECKER_COLORS,
   drawCheckerboard,
   drawPixelGrid,
   drawTileGrid,
 } from './overlays';
+export { loadRecentColors, RECENT_COLORS_KEY, saveRecentColors } from './recentColors';
 export {
   createRenderer,
   type GridConfig,

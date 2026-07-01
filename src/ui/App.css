@@ -47,10 +47,31 @@
 .pf-workbench {
   flex: 1 1 auto;
   display: flex;
+  align-items: stretch;
+  gap: var(--space-5);
   min-height: 0;
   padding: var(--space-5);
 }
 
 .pf-workbench > .pf-stage {
   flex: 1 1 auto;
+  min-width: 0;
+}
+
+.pf-workbench > .pf-color {
+  flex: none;
+  align-self: flex-start;
+  max-height: 100%;
+  overflow-y: auto;
+}
+
+/* Narrow / touch: stack the panel under the canvas as a full-width sheet. */
+@media (max-width: 720px) {
+  .pf-workbench {
+    flex-direction: column;
+  }
+  .pf-workbench > .pf-color {
+    width: 100%;
+    align-self: stretch;
+  }
 }

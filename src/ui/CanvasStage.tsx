@@ -4,11 +4,15 @@ import {
   fillRectMut,
   fitToScreen,
   nextZoom,
+  type Palette,
   type PixelBuffer,
+  paletteSwap,
   panBy,
   type RGBA,
   rgbaToHex,
   setPixelMut,
+  snapBufferToPalette,
+  snapColorToPalette,
   zoomAt,
 } from '../core';
 import { createRenderer, type PixelRenderer } from '../platform';
@@ -130,21 +134,44 @@ function attachInteractions(container: HTMLElement, h: EngineHandles): () => voi
   };
 }
 
+export interface CanvasStageProps {
+  /**
+   * External paint color (U-005 Color panel). When provided it drives the
+   * pencil and the internal demo swatches are hidden; when omitted, the stage is
+   * self-contained with its own demo palette (U-003 standalone preview). In
+   * indexed mode this is already the palette-snapped color (see `effectivePaintColor`).
+   */
+  readonly paintColor?: RGBA;
+  /**
+   * Indexed / palette-lock mode (U-005). When it turns on, the existing artwork is
+   * quantized to `palette`; while on, drawing is restricted to the palette (the
+   * caller passes a snapped `paintColor`) and changing `palette` palette-swaps the
+   * artwork by index on the real canvas.
+   */
+  readonly indexed?: boolean;
+  /** The active palette used for indexed-mode quantize / palette-swap. */
+  readonly palette?: Palette;
+}
+
 /**
  * CanvasStage — a runnable preview of the U-003 render pipeline: three stacked
  * canvases (checkerboard backdrop, nearest-neighbor display, grid overlay) with
  * middle/right-drag pan, cursor-centered wheel zoom, and a single-pixel pencil
- * that repaints only its dirty rect. The full tool belt/layers/frames and the
- * complete keyboard map arrive in later units; this proves the engine draws,
- * maps coordinates, and stays clean.
+ * that repaints only its dirty rect. When a `paintColor` is supplied (by the
+ * U-005 Color & Palette panel), the pencil uses it. The full tool belt/layers/
+ * frames and the complete keyboard map arrive in later units; this proves the
+ * engine draws, maps coordinates, and stays clean.
  */
-export function CanvasStage() {
+export function CanvasStage({ paintColor, indexed, palette }: CanvasStageProps = {}) {
   const wellRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLCanvasElement>(null);
   const displayRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<PixelRenderer | null>(null);
   const bufferRef = useRef<PixelBuffer | null>(null);
+  // The palette currently baked into the buffer while indexed mode is on; `null`
+  // when free-color, so re-entering indexed mode re-quantizes from scratch.
+  const appliedPaletteRef = useRef<Palette | null>(null);
 
   const [pos, setPos] = useState<StagePos>({ x: 0, y: 0 });
   const [zoomPct, setZoomPct] = useState(100);
@@ -152,8 +179,16 @@ export function CanvasStage() {
   const [erasing, setErasing] = useState(false);
   const [gridOn, setGridOn] = useState(true);
 
+  const controlled = paintColor !== undefined;
+  const rawColor = erasing ? TRANSPARENT : (paintColor ?? PAINTS[paintIndex].rgba);
+  // Belt-and-suspenders palette lock: when indexed mode is on, the stage snaps the
+  // pencil color to the active palette ITSELF, so off-palette pixels are impossible
+  // to draw even if a caller forgets to pre-snap `paintColor` (defense in depth for
+  // the H-1 criterion). Idempotent for `App`, which already passes the snapped
+  // `effectivePaintColor`. A transparent color (eraser) is preserved by the snap.
+  const locked = indexed === true && palette !== undefined && palette.colors.length > 0;
   const colorRef = useRef<RGBA>(PAINTS[0].rgba);
-  colorRef.current = erasing ? TRANSPARENT : PAINTS[paintIndex].rgba;
+  colorRef.current = locked ? snapColorToPalette(palette, rawColor) : rawColor;
 
   // One-time engine setup: create renderer, seed art, fit, wire interactions.
   useEffect(() => {
@@ -172,6 +207,11 @@ export function CanvasStage() {
     const buf = createBuffer(ART_W, ART_H);
     seedForgeMotif(buf);
     bufferRef.current = buf;
+    // A freshly seeded buffer is not yet quantized to any palette, so clear the
+    // applied-palette marker; the indexed effect (which runs right after this one)
+    // then re-quantizes if the lock is on. Guards the StrictMode remount, where the
+    // buffer is re-created but refs persist.
+    appliedPaletteRef.current = null;
     renderer.setComposite(buf);
 
     const applyFit = (): void => {
@@ -203,6 +243,35 @@ export function CanvasStage() {
   useEffect(() => {
     rendererRef.current?.setGrid({ pixel: gridOn, tile: null });
   }, [gridOn]);
+
+  // Indexed / palette-lock: quantize the live artwork to the palette when the lock
+  // turns on, and palette-swap it by index when the palette changes while locked —
+  // so the killer retro feature runs on the REAL canvas, not just a preview. The
+  // pencil is separately restricted via the snapped `paintColor` from App.
+  useEffect(() => {
+    const renderer = rendererRef.current;
+    const buffer = bufferRef.current;
+    if (!renderer || !buffer || palette === undefined) {
+      return;
+    }
+    if (!indexed) {
+      appliedPaletteRef.current = null;
+      return;
+    }
+    const applied = appliedPaletteRef.current;
+    appliedPaletteRef.current = palette;
+    if (applied === palette || palette.colors.length === 0) {
+      return; // no change, or nothing to snap to (empty palette)
+    }
+    const next =
+      applied === null || applied.colors.length === 0
+        ? snapBufferToPalette(buffer, palette) // entering lock: quantize existing art
+        : // palette changed while locked: recolor by index, then scrub any pixel
+          // whose index is absent from a shorter/edited target back into the palette.
+          snapBufferToPalette(paletteSwap(buffer, applied, palette), palette);
+    bufferRef.current = next;
+    renderer.setComposite(next);
+  }, [indexed, palette]);
 
   const applyViewport = (mapZoom: (currentZoom: number) => number): void => {
     const well = wellRef.current;
@@ -237,20 +306,21 @@ export function CanvasStage() {
       </p>
       <div className="pf-stage__toolbar" role="toolbar" aria-label="Paint and view controls">
         <div className="pf-stage__group">
-          {PAINTS.map((paint, i) => (
-            <button
-              key={paint.name}
-              type="button"
-              className="pf-swatch"
-              style={{ background: rgbaToHex(paint.rgba) }}
-              aria-label={`${paint.name} paint`}
-              aria-pressed={!erasing && paintIndex === i}
-              onClick={() => {
-                setErasing(false);
-                setPaintIndex(i);
-              }}
-            />
-          ))}
+          {!controlled &&
+            PAINTS.map((paint, i) => (
+              <button
+                key={paint.name}
+                type="button"
+                className="pf-swatch"
+                style={{ background: rgbaToHex(paint.rgba) }}
+                aria-label={`${paint.name} paint`}
+                aria-pressed={!erasing && paintIndex === i}
+                onClick={() => {
+                  setErasing(false);
+                  setPaintIndex(i);
+                }}
+              />
+            ))}
           <button
             type="button"
             className="pf-btn"

@@ -1,0 +1,332 @@
+/*
+ * Color & Palette panel (U-005). Tokens only; hard bevels; no border-radius, no
+ * blurred shadow, no soft/eased motion on chrome (constitution + design-direction).
+ * The picker field and swatch checker are TRUE-COLOR pixel surfaces (like the
+ * artwork canvas), not themed chrome, so they legitimately show real colors.
+ */
+
+.pf-color {
+  width: clamp(232px, 22vw, 288px);
+  display: flex;
+  flex-direction: column;
+}
+
+.pf-color .pf-panel__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+
+.pf-color__editing {
+  margin: 0;
+  color: var(--c-ash);
+}
+.pf-color__editing b {
+  color: var(--c-steel);
+}
+
+/* Indexed / palette-lock readout: shows the exact color the pencil will draw
+ * (the fg snapped to the active palette). The swatch + wording convey the state,
+ * never hue alone (a11y). */
+.pf-color__lock {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  color: var(--c-spark);
+}
+.pf-color__lock b {
+  color: var(--c-steel);
+}
+.pf-color__lockswatch {
+  width: calc(var(--px) * 8);
+  height: calc(var(--px) * 8);
+  flex: none;
+  box-shadow: var(--bevel-inset);
+}
+
+.pf-color__section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.pf-color__swatchbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+
+/* ── Transparency checker + swatch color layer ───────────────────────────── */
+.pf-checker {
+  --swatch: transparent;
+  background-color: var(--c-checker-a);
+  background-image:
+    linear-gradient(var(--swatch), var(--swatch)),
+    conic-gradient(
+      var(--c-checker-b) 25%,
+      transparent 0 50%,
+      var(--c-checker-b) 0 75%,
+      transparent 0
+    );
+  background-size:
+    100% 100%,
+    calc(var(--px) * 4) calc(var(--px) * 4);
+  image-rendering: pixelated;
+}
+
+/* ── fg / bg slots ───────────────────────────────────────────────────────── */
+.pf-slots {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.pf-slots__stack {
+  position: relative;
+  width: calc(var(--px) * 30);
+  height: calc(var(--px) * 30);
+  flex: none;
+}
+.pf-slots__swatch {
+  position: absolute;
+  width: calc(var(--px) * 20);
+  height: calc(var(--px) * 20);
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  box-shadow: var(--bevel-inset), var(--drop-hard);
+}
+.pf-slots__swatch--bg {
+  right: 0;
+  bottom: 0;
+}
+.pf-slots__swatch--fg {
+  left: 0;
+  top: 0;
+  z-index: 1;
+}
+.pf-slots__swatch:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring), var(--bevel-inset);
+}
+.pf-slots__actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+/* ── HSV picker ──────────────────────────────────────────────────────────── */
+.pf-picker {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.pf-picker__sv {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 168 / 132;
+  box-shadow: var(--bevel-inset);
+  cursor: crosshair;
+  touch-action: none;
+}
+.pf-picker__bar {
+  position: relative;
+  width: 100%;
+  height: calc(var(--px) * 8);
+  box-shadow: var(--bevel-inset);
+  cursor: ew-resize;
+  touch-action: none;
+}
+.pf-picker__sv:focus-visible,
+.pf-picker__bar:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring), var(--bevel-inset);
+}
+.pf-picker__canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+.pf-picker__ring {
+  position: absolute;
+  width: calc(var(--px) * 4);
+  height: calc(var(--px) * 4);
+  transform: translate(-50%, -50%);
+  box-shadow:
+    0 0 0 var(--px) var(--c-slag),
+    0 0 0 calc(var(--px) * 2) var(--c-steel);
+  pointer-events: none;
+}
+.pf-picker__thumb {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: calc(var(--px) * 2);
+  transform: translateX(-50%);
+  background: var(--c-steel);
+  box-shadow: 0 0 0 var(--px) var(--c-slag);
+  pointer-events: none;
+}
+.pf-picker__hex {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.pf-picker__hexinput {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  background: var(--c-anvil);
+  color: var(--c-steel);
+  box-shadow: var(--bevel-inset);
+  text-transform: uppercase;
+}
+.pf-picker__hexinput:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring), var(--bevel-inset);
+}
+
+/* ── recent colors ───────────────────────────────────────────────────────── */
+.pf-recent {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.pf-recent__label,
+.pf-color__section > .pf-label {
+  color: var(--c-ash);
+}
+.pf-recent__empty {
+  margin: 0;
+  color: var(--c-ash);
+}
+.pf-recent__grid,
+.pf-palette__grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(calc(var(--px) * 11), 1fr));
+  gap: var(--space-2);
+}
+.pf-recent__swatch,
+.pf-palette__swatch {
+  width: 100%;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  box-shadow: var(--bevel-raised);
+  transition: box-shadow var(--dur-press) var(--step-fast);
+}
+.pf-recent__swatch:hover,
+.pf-palette__swatch:hover {
+  box-shadow:
+    0 0 0 var(--px) var(--c-spark),
+    var(--bevel-raised);
+}
+.pf-recent__swatch:focus-visible,
+.pf-palette__swatch:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring), var(--bevel-raised);
+}
+.pf-palette__swatch[data-selected="true"] {
+  box-shadow:
+    0 0 0 var(--px) var(--c-anvil),
+    0 0 0 calc(var(--px) * 2) var(--c-ember);
+}
+.pf-palette__empty {
+  margin: 0;
+  color: var(--c-ash);
+}
+
+/* ── palette menu ────────────────────────────────────────────────────────── */
+.pf-palmenu,
+.pf-swap {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.pf-palmenu__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.pf-palmenu__row--buttons,
+.pf-swap__row {
+  flex-wrap: wrap;
+}
+.pf-select {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  background: var(--c-iron);
+  color: var(--c-steel);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  box-shadow: var(--bevel-inset);
+}
+.pf-select:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring), var(--bevel-inset);
+}
+.pf-palmenu__status {
+  margin: 0;
+  color: var(--c-patina);
+}
+.pf-palmenu__status--error {
+  color: var(--c-warning);
+}
+
+/* ── palette-swap preview ────────────────────────────────────────────────── */
+.pf-swap__panes {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+.pf-swap__pane {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  flex: 1 1 0;
+}
+.pf-swap__canvas {
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  box-shadow: var(--bevel-inset);
+}
+.pf-swap__pane figcaption {
+  color: var(--c-ash);
+  font-size: 13px;
+  text-align: center;
+}
+.pf-swap__arrow {
+  color: var(--c-ember);
+  font-family: var(--font-display);
+  font-size: 12px;
+  flex: none;
+}
+
+/* Accessible-hidden utility (self-contained so the panel needs no siblings). */
+.pf-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}

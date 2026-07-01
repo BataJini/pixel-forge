@@ -80,3 +80,93 @@ export function rgbaToHex(c: RGBA, withAlpha = false): string {
   const base = `#${toHexByte(c[0])}${toHexByte(c[1])}${toHexByte(c[2])}`;
   return withAlpha ? `${base}${toHexByte(c[3])}` : base;
 }
+
+/**
+ * A color in HSV space for the picker: `h` in [0, 360), `s` and `v` in [0, 1].
+ * Alpha is carried separately (0–255) so the picker's alpha slider stays
+ * orthogonal to hue/saturation/value.
+ */
+export interface Hsv {
+  h: number;
+  s: number;
+  v: number;
+}
+
+const HUE_MAX = 360;
+const HUE_SEXTANT = 60;
+
+function clampUnit(n: number): number {
+  if (!Number.isFinite(n)) {
+    return 0;
+  }
+  if (n < 0) {
+    return 0;
+  }
+  if (n > 1) {
+    return 1;
+  }
+  return n;
+}
+
+/**
+ * Convert an RGBA color to HSV (alpha ignored). Pure and deterministic. A gray
+ * has `s = 0` and a conventional `h = 0`. Inverse of `hsvToRgb` up to 8-bit
+ * rounding.
+ */
+export function rgbToHsv(c: RGBA): Hsv {
+  const r = clampChannel(c[0]) / CHANNEL_MAX;
+  const g = clampChannel(c[1]) / CHANNEL_MAX;
+  const b = clampChannel(c[2]) / CHANNEL_MAX;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const delta = max - min;
+  let h = 0;
+  if (delta > 0) {
+    if (max === r) {
+      h = ((g - b) / delta) % 6;
+    } else if (max === g) {
+      h = (b - r) / delta + 2;
+    } else {
+      h = (r - g) / delta + 4;
+    }
+    h *= HUE_SEXTANT;
+    if (h < 0) {
+      h += HUE_MAX;
+    }
+  }
+  const s = max === 0 ? 0 : delta / max;
+  return { h, s, v: max };
+}
+
+/**
+ * Convert HSV (+ optional 8-bit alpha) back to an RGBA color. `h` wraps mod 360;
+ * `s`/`v` are clamped to [0, 1]; `a` is clamped/rounded to 0–255. Inverse of
+ * `rgbToHsv`.
+ */
+export function hsvToRgb(h: number, s: number, v: number, a = CHANNEL_MAX): RGBA {
+  const hue = ((((Number.isFinite(h) ? h : 0) % HUE_MAX) + HUE_MAX) % HUE_MAX) / HUE_SEXTANT;
+  const sat = clampUnit(s);
+  const val = clampUnit(v);
+  const chroma = val * sat;
+  const x = chroma * (1 - Math.abs((hue % 2) - 1));
+  const m = val - chroma;
+  const sextant = Math.floor(hue) % 6;
+  const rgb: readonly [number, number, number] =
+    sextant === 0
+      ? [chroma, x, 0]
+      : sextant === 1
+        ? [x, chroma, 0]
+        : sextant === 2
+          ? [0, chroma, x]
+          : sextant === 3
+            ? [0, x, chroma]
+            : sextant === 4
+              ? [x, 0, chroma]
+              : [chroma, 0, x];
+  return [
+    clampChannel((rgb[0] + m) * CHANNEL_MAX),
+    clampChannel((rgb[1] + m) * CHANNEL_MAX),
+    clampChannel((rgb[2] + m) * CHANNEL_MAX),
+    clampChannel(a),
+  ];
+}

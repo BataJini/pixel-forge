@@ -4,3 +4,16 @@
  * src/core; browser side effects stay in src/platform. Populated in later units.
  */
 export const STATE_MODULE = 'pixel-forge/state' as const;
+
+export {
+  type ColorAction,
+  type ColorState,
+  colorReducer,
+  DEFAULT_ACTIVE_PALETTE,
+  effectivePaintColor,
+  initialColorState,
+  pushRecent,
+  RECENT_CAP,
+  RESET_BG,
+  RESET_FG,
+} from './colorStore';
