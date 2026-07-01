@@ -43,6 +43,7 @@ export interface RendererConfig {
 const DEFAULT_GRID_MIN_ZOOM = 8;
 const DEFAULT_GRID_COLOR = 'rgba(120,120,120,0.55)';
 const DEFAULT_TILE_COLOR = 'rgba(255,176,58,0.6)';
+const DEFAULT_SELECTION_COLOR = 'rgba(255,176,58,0.95)';
 const MIN_CHECKER_CELL = 4;
 
 function context2d(canvas: HTMLCanvasElement): CanvasRenderingContext2D {
@@ -75,6 +76,7 @@ export class PixelRenderer {
 
   private viewport: Viewport = { zoom: 1, panX: 0, panY: 0 };
   private grid: GridConfig;
+  private selection: Rect | null = null;
   private sourceW = 0;
   private sourceH = 0;
   private cssW = 0;
@@ -172,6 +174,17 @@ export class PixelRenderer {
   /** Toggle pixel/tile grid; repaints the overlay. */
   setGrid(grid: GridConfig): void {
     this.grid = grid;
+    this.needsStatic = true;
+    this.schedule();
+  }
+
+  /**
+   * Show a selection marquee outline (art-space rect) on the overlay, or clear it
+   * with `null`. Purely presentational — the marquee never touches the pixel
+   * buffer or any export (clean-export invariant).
+   */
+  setSelectionOverlay(rect: Rect | null): void {
+    this.selection = rect;
     this.needsStatic = true;
     this.schedule();
   }
@@ -328,6 +341,25 @@ export class PixelRenderer {
         this.tileColor,
       );
     }
+    this.paintSelection();
+  }
+
+  /** Draw the selection marquee (hard 1px Spark outline) on the overlay. */
+  private paintSelection(): void {
+    if (!this.selection || this.selection.w <= 0 || this.selection.h <= 0) {
+      return;
+    }
+    const { zoom, panX, panY } = this.viewport;
+    const x = Math.round(panX + this.selection.x * zoom) + 0.5;
+    const y = Math.round(panY + this.selection.y * zoom) + 0.5;
+    const w = this.selection.w * zoom;
+    const h = this.selection.h * zoom;
+    this.overCtx.save();
+    this.overCtx.strokeStyle = DEFAULT_SELECTION_COLOR;
+    this.overCtx.lineWidth = 1;
+    this.overCtx.setLineDash([4, 3]);
+    this.overCtx.strokeRect(x, y, w - 1, h - 1);
+    this.overCtx.restore();
   }
 }
 

@@ -58,3 +58,26 @@ unit is verified, especially after a fix that took several iterations.
   the `-6` fix worktree. When a unit fixes across iterations, re-point Reviewer/QA/
   Verifier at the new worktree and mark the old artifacts as superseded to avoid a
   stale FAIL blocking a genuinely-passing build.
+- **A green held-out gate does NOT mean full master-spec conformance — reconcile the
+  spec section against `criteria.md` at integrate time (U-004).** The held-out
+  `docs/acceptance/U-004` (7/7) and the authoritative `criteria.md` manual list both
+  passed, yet master-spec §3.2 also lists a Pencil "Alt = temporary eyedropper"
+  modifier that is simply not implemented — invisible to the gate because it was never
+  encoded as a criterion. A stale `gate/U-004.json` still pointing at the failed `-23`
+  worktree compounded the risk (the real PASS was `-36`). Process rule for the Doc
+  agent: before flipping `verified`, (a) confirm the gate/review/QA artifacts all name
+  the *same winning* worktree, and (b) diff the master-spec section against the
+  held-out `criteria.md` and record every spec detail the criteria don't cover as an
+  explicit deferral (decision-log + work-breakdown) — otherwise convenience details
+  silently ship missing. Prefer recording a deferral over editing the spec when the
+  detail is genuinely owned by a later unit (here U-012's modifier map).
+- **When a worktree is cut from the current `master` tip, integration is a clean
+  squash — but still commit-then-`--squash`, never a raw merge (U-004).** Unlike U-003
+  (older base → CRLF churn) and U-002 (shared-scaffold semantic conflict), U-004's
+  `-36` worktree branched from `master@ccb5290` with `package.json` unchanged, so
+  base == tip and the squash was a faithful 1:1 of the reviewed diff (no genuine-diff
+  filtering, no `npm install` needed). The deliverable was still *uncommitted* in the
+  worktree, so the U-002 rule held: `git add -A && commit` on the branch first, then
+  `git merge --squash` from `master`, then re-run the full gate on `master` before
+  flipping status. Confirm base==tip cheaply with `git log master..<branch>` (empty
+  before the commit) + an empty `package.json`/lock diff to know the easy path applies.

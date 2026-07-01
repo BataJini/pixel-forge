@@ -1,0 +1,33 @@
+{
+  "unit": "U-004",
+  "title": "Drawing tools",
+  "ranCommands": true,
+  "buildExit": 0,
+  "testExit": 0,
+  "artifactsPresent": true,
+  "rewardHackFlags": [],
+  "verifiedAt": "2026-07-01T20:16:00Z",
+  "location": ".claude/worktrees/wf_023eceaa-423-23 (pre-integration worktree; U-004 status=pending on master, code uncommitted in worktree on HEAD ccb5290 = U-003 integration)",
+  "evidence": "Independent verifier re-run. U-004 code is NOT yet in master (buffer.ts on master lacks drawLine/drawRect/drawEllipse/floodFill and there is no tools.ts/selection.ts/path.ts); the deliverable lives uncommitted in worktree wf_023eceaa-423-23 (git status: M buffer.ts/index.ts/renderer.ts/state/index.ts/CanvasStage.*/vite.config.ts + new tools.ts/selection.ts/path.ts/toolSession.ts and their tests). Held-out docs/acceptance/U-004/tools.acceptance.test.ts is byte-identical to HEAD (git diff HEAD empty). No tracked *.test.ts modified (diffstat empty). `npm run build` (tsc -b && vite build) -> exit 0; emitted dist/index.html (738 B) + 8 hashed .woff2 + index-*.js/css. `npm test` (vitest run) -> exit 0, 18 files / 249 tests passed. Held-out suite run explicitly: `npx vitest run docs/acceptance/U-004/tools.acceptance.test.ts` -> exit 0, 7/7 passed (drawLine endpoints+contiguity+horizontal isolation, drawRect outline-empty-interior vs fill, drawEllipse center symmetry, floodFill contiguous-with-divider vs global). vite.config include adds only the U-004 acceptance glob (does not touch the held-out test). Reward-hack scan over src: no .skip/.only/xit/xdescribe, no @ts-ignore/@ts-nocheck, no process.exit/eslint-disable, no early-return masking; drawEllipse uses a real Zingl rect-ellipse (plotEllipseRect) algorithm, not hardcoded fixtures.",
+  "commands": [
+    "git -C .claude/worktrees/wf_023eceaa-423-23 diff HEAD -- docs/acceptance/U-004/ -> empty (held-out untouched)",
+    "npm run build  -> exit 0 (dist/index.html emitted)",
+    "npm test       -> exit 0 (Test Files 18 passed, Tests 249 passed)",
+    "npx vitest run docs/acceptance/U-004/tools.acceptance.test.ts -> exit 0 (7 passed)"
+  ],
+  "integrationNote": "The block above is the verifier's ORIGINAL run on the first worktree wf_023eceaa-423-23 (249 tests). That worktree was FAILED by Reviewer+QA on a HIGH (copy/cut/paste did not operate on the selection) and was NOT integrated. The verified+integrated deliverable is the fix worktree wf_023eceaa-423-36 (see docs/reviews/U-004.md + docs/qa/U-004.md), whose objective gate is likewise clean: build 0, held-out docs/acceptance/U-004 7/7 (byte-identical/untouched), no reward-hack flags, vitest 272/272 (18 files; the +23 are the new clipboard/floating-selection tests).",
+  "integratedTo": "master",
+  "integratedAt": "2026-07-01T20:55:00Z",
+  "postMergeMaster": {
+    "worktree": "wf_023eceaa-423-36",
+    "typecheckExit": 0,
+    "testExit": 0,
+    "testsPassed": "272/272 (18 files)",
+    "heldOut": "docs/acceptance/U-004 7/7",
+    "lintExit": 0,
+    "lintFiles": 89,
+    "buildExit": 0,
+    "bundleKB": 231.76,
+    "artifactsPresent": true
+  }
+}

@@ -8,7 +8,7 @@ The engine builds a unit only when all its deps are `verified`.
 | U-001 | Project scaffold + tooling + CI/deploy | — | §1 | verified |
 | U-002 | Design system & retro UI chrome (Forge) | U-001 | design-direction, §3 | verified |
 | U-003 | Canvas engine + pixel buffer + render pipeline | U-001 | §3.1, §4.1, §5 | verified |
-| U-004 | Drawing tools | U-003 | §3.2, §5 | pending |
+| U-004 | Drawing tools | U-003 | §3.2, §5 | verified |
 | U-005 | Color & palette system | U-002, U-003 | §3.3, §4.4, §5 | pending |
 | U-006 | History / undo-redo | U-003, U-004 | §3.6, §5 | pending |
 | U-007 | Layers panel & management | U-003, U-006 | §3.4, §4.1 | pending |
@@ -121,6 +121,35 @@ The engine builds a unit only when all its deps are `verified`.
   tolerance, pixel-perfect removes doubled corners); selection constrains edits;
   mirror mirrors. Held-out: `docs/acceptance/U-004`.
 - Deps: U-003
+- **Status: verified** (2026-07-01, integrated to `master`, 2 iterations). First
+  worktree `wf_023eceaa-423-23` FAILED Review/QA on one HIGH (copy/cut/paste not
+  operating on the selection) + advisories; the fix worktree `wf_023eceaa-423-36`
+  passed Reviewer + QA + the objective gate. Delivered pure engine ops in
+  `src/core/{buffer(+tools),tools,path,selection}.ts` (Bresenham line, midpoint/Zingl
+  ellipse, iterative flood-fill with tolerance, pixel-perfect filter, mirror
+  transforms, Bayer dither) + the interactive `src/state/toolSession.ts` controller
+  (11 tools, floating-selection clipboard for copy/cut/paste/stamp, move-nudge,
+  selection add/subtract/all/deselect) wired into the throwaway `CanvasStage` preview.
+  Post-merge `master` gate green: typecheck 0, vitest **272/18** (incl. held-out
+  `docs/acceptance/U-004` 7/7), build 0 + `dist/` artifacts (index bundle 231.76 KB
+  < 250 KB budget), `npm run lint` 0/89. Held-out test byte-identical (untouched);
+  reward-hack scan clean. Advisory follow-ups (all non-blocking):
+  - **§3.2 Pencil "Alt = temporary eyedropper" not implemented → U-012.** Not in the
+    authoritative `criteria.md` manual list; fold into U-012's full modifier/keyboard
+    map (or the Eyedropper tool already covers the need).
+  - **QA F-1 (MEDIUM) → U-012:** `copySelection()` omits `onChange()`, so the mouse-only
+    Copy→Paste button path leaves Paste disabled until the next re-render (keyboard
+    Ctrl+C/V path works — criterion passes). One-line fix, deferred to U-012 view/tool
+    chrome (throwaway preview per ADR-010).
+  - **QA F-2 / Review F-2/F-3 (LOW) → U-012/U-013:** wheel-zoom doesn't update the Zoom%
+    readout; whole-layer move/nudge does a full-canvas repaint + edge-destructive nudge
+    (perf → U-013); preview `--c-ash`-on-`--c-iron` AA gap folds into the U-002 F-1 fix.
+  - **Review F-4 (LOW) → U-005/U-012:** coverage `include` still `src/core/**`, so
+    `src/state/toolSession.ts` isn't counted (exercised by 89 unit + 6 browser
+    assertions); widen `include` to `src/state`/`src/platform` (same carry-over as
+    U-001 F-2 / U-002 F-4).
+  - **Single-undo-per-gesture** is DEFERRED to U-006 per `criteria.md`; the gesture model
+    already coalesces a drag into one accumulated dirty region (ready).
 
 ### U-005 — Color & palette system
 - Spec ref: §3.3, §4.4, §5

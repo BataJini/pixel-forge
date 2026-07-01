@@ -4,3 +4,11 @@
  * src/core; browser side effects stay in src/platform. Populated in later units.
  */
 export const STATE_MODULE = 'pixel-forge/state' as const;
+
+export {
+  type PointerMods,
+  type RenderTarget,
+  type ToolId,
+  ToolSession,
+  type ToolState,
+} from './toolSession';

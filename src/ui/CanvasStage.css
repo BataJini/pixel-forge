@@ -70,6 +70,17 @@
   transform: translate(var(--px), var(--px));
 }
 
+.pf-btn:disabled {
+  color: var(--c-steel);
+  opacity: 0.4;
+  cursor: not-allowed;
+  box-shadow: var(--bevel-inset);
+}
+
+.pf-btn:disabled:hover {
+  color: var(--c-steel);
+}
+
 .pf-swatch {
   width: var(--space-5);
   height: var(--space-5);
@@ -83,6 +94,64 @@
   box-shadow:
     0 0 0 var(--px) var(--c-anvil),
     0 0 0 calc(var(--px) * 2) var(--c-spark);
+}
+
+/* Foreground-over-background color slots (the fg/bg pair, §3.3). */
+.pf-colorpair {
+  position: relative;
+  width: calc(var(--space-5) + var(--px) * 3);
+  height: calc(var(--space-5) + var(--px) * 3);
+}
+
+.pf-colorpair__fg,
+.pf-colorpair__bg {
+  position: absolute;
+  width: var(--space-5);
+  height: var(--space-5);
+  box-shadow: var(--bevel-raised);
+}
+
+.pf-colorpair__fg {
+  top: 0;
+  left: 0;
+  z-index: 1;
+}
+
+.pf-colorpair__bg {
+  right: 0;
+  bottom: 0;
+}
+
+/* A labeled slider control (brush size, tolerance). */
+.pf-field {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 0 var(--space-2);
+  color: var(--c-ash);
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+
+.pf-field span {
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.pf-field b {
+  min-width: 1.5ch;
+  color: var(--c-steel);
+  text-align: right;
+}
+
+.pf-field input[type="range"] {
+  width: calc(var(--px) * 32);
+  accent-color: var(--c-ember);
+}
+
+.pf-stage__hex b {
+  font-family: var(--font-numeric, var(--font-ui));
+  text-transform: uppercase;
 }
 
 .pf-stage__well {

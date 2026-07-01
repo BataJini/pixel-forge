@@ -2,6 +2,36 @@
 
 ADR style. Newest first.
 
+## ADR-011 — U-004 integration: clean squash-merge; §3.2 Pencil-Alt deferred  (2026-07-01)
+- **Context:** U-004 (drawing tools) took 2 iterations. The first worktree
+  (`wf_023eceaa-423-23`) FAILED Review/QA on a HIGH gap — copy/cut/paste did not
+  operate on the selection — so it never integrated; the fix worktree
+  (`wf_023eceaa-423-36`) added a floating-selection clipboard model and passed
+  Reviewer + QA + the objective gate (held-out 7/7, byte-identical). Unlike U-003,
+  this worktree was cut from the current `master` (`ccb5290`, U-003 integration), so
+  base == tip: no cross-base CRLF churn and no shared-scaffold semantic conflict — the
+  only entrypoint touched (`App`/`CanvasStage` throwaway preview) is still owned by the
+  same successive-canvas lineage and composes cleanly. `package.json` unchanged (no
+  dependency sync needed). The deliverable was uncommitted in the worktree.
+- **Decision:** Committed the deliverable on its branch, then `git merge --squash`
+  into `master` for a single integration commit (base was a fast-forward, so the squash
+  is a faithful 1:1 of the reviewed diff). Ran the full post-merge gate on `master`
+  before flipping status. Accepted one genuine spec deviation as a **deferral, not a
+  change**: master-spec §3.2 lists "Alt = temporary eyedropper" for the Pencil, which
+  is not implemented and is absent from the authoritative `criteria.md` manual list;
+  recorded it (plus QA F-1's one-line `onChange()` re-render fix and the LOW view/perf
+  advisories) against U-012/U-013 rather than editing the spec.
+- **Rationale:** The spec is still accurate — every authoritative acceptance criterion
+  is met; the outstanding items are convenience modifiers and preview-chrome polish
+  that the designated shell/perf units (U-012/U-013) own, so amending master-spec would
+  add noise without capturing a real design change. Squash keeps `master` history one
+  commit per verified unit, matching U-002/U-003.
+- **Consequences:** `master` carries the full drawing-tool engine + interactive
+  `ToolSession`; U-006 (undo/redo) can now build on the gesture/dirty-rect model, and
+  U-005/U-007/U-012 inherit the selection-mask + clipboard primitives. The Pencil-Alt
+  modifier and Copy-button re-render must be picked up in U-012 or they silently ship
+  missing.
+
 ## ADR-010 — U-003 integration: cross-base merge + App-root conflict + `biome check .` fix  (2026-07-01)
 - **Context:** U-003 (canvas engine + pixel buffer + render pipeline) passed
   Reviewer + QA + the objective gate on the first worktree (`wf_023eceaa-423-13`;
