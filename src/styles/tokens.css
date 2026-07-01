@@ -1,0 +1,135 @@
+/* biome-ignore-all lint/complexity/noImportantStyles: the global prefers-reduced-motion reset must override any animation/transition declaration (WCAG 2.2 §2.3.3); this is its only use in the file. */
+/*
+ * PixelForge — design tokens (machine-readable source of visual truth)
+ * ---------------------------------------------------------------------------
+ * Derived verbatim from docs/design-direction.md. U-001 ships ONLY this token
+ * layer plus a minimal, brand-safe shell. The full chrome (self-hosted pixel
+ * fonts, bevel component library, CRT display layer, sound) is built in U-002.
+ *
+ * Immutable rules honored here (constitution + design-direction):
+ *   - No `border-radius` on chrome. No blurred `box-shadow`. No soft/radial
+ *     gradients. No cubic-bezier easing — motion snaps with `steps()`.
+ *   - Integer offsets only; every dimension is a multiple of the `--px` grid.
+ *   - Font smoothing OFF so bitmap glyphs stay crisp.
+ *   - No third-party font/asset requests — fully offline after first load.
+ *
+ * Theme model: same token *names* across themes; only the values swap, so
+ * components stay theme-agnostic. Default on first load is Arcade CRT (`:root`);
+ * the bespoke Forge ramp is opt-in via `[data-theme="forge"]`.
+ */
+
+:root,
+:root[data-theme="arcade"] {
+  /* Arcade CRT ramp — neon on black (DEFAULT theme) */
+  --c-anvil: #06070c; /* app background — deep CRT black */
+  --c-iron: #10131e; /* panels / raised surfaces */
+  --c-iron-hi: #232a3e; /* bevel top-left highlight */
+  --c-slag: #020308; /* bevel bottom-right shade / hard outline */
+  --c-ash: #7c86a8; /* secondary/muted text (>=4.5:1 on anvil) */
+  --c-steel: #e8f0ff; /* primary text */
+  --c-ember: #00f0ff; /* primary accent / active — electric cyan */
+  --c-ember-deep: #0090c4; /* pressed/active accent */
+  --c-spark: #ff2e88; /* focus ring / hot highlight — hot magenta */
+  --c-flame: #ffd300; /* brightest highlights — arcade yellow */
+  --c-quench: #39ff14; /* cool secondary — laser green */
+  --c-patina: #39ff14; /* success */
+  --c-warning: #ff3b30; /* error / destructive */
+}
+
+:root[data-theme="forge"] {
+  /* Forge Ramp — the bespoke workshop identity (temperature metaphor) */
+  --c-anvil: #12100e;
+  --c-iron: #2a2622;
+  --c-iron-hi: #4a423a;
+  --c-slag: #0c0a08;
+  --c-ash: #8a7e70;
+  --c-steel: #e8dfd2;
+  --c-ember: #ff6a1a;
+  --c-ember-deep: #c24a12;
+  --c-spark: #ffb03a;
+  --c-flame: #ffe08a;
+  --c-quench: #2fa8c4;
+  --c-patina: #5f9e5a;
+  --c-warning: #e23b2e;
+}
+
+:root {
+  /* Logical pixel grid — everything snaps to integer multiples of --px */
+  --px: 2px;
+  --space-1: calc(var(--px) * 1); /* 2 */
+  --space-2: calc(var(--px) * 2); /* 4 */
+  --space-3: calc(var(--px) * 4); /* 8 */
+  --space-4: calc(var(--px) * 8); /* 16 */
+  --space-5: calc(var(--px) * 12); /* 24 */
+  --space-6: calc(var(--px) * 16); /* 32 */
+  --space-7: calc(var(--px) * 24); /* 48 */
+
+  /* Theme-independent transparency checkerboard (never themed, never exported) */
+  --c-checker-a: #c8c8c8;
+  --c-checker-b: #8f8f8f;
+
+  /* Hard bevels — 0 blur, 0 spread, whole-pixel offsets (the brand technique) */
+  --bevel-raised:
+    inset var(--px) var(--px) 0 0 var(--c-iron-hi),
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 0 var(--c-slag),
+    var(--px) var(--px) 0 0 var(--c-slag);
+  --bevel-inset:
+    inset var(--px) var(--px) 0 0 var(--c-slag),
+    inset calc(var(--px) * -1) calc(var(--px) * -1) 0 0 var(--c-iron-hi);
+
+  /* Focus ring — hot highlight (Spark), hard offset, never hue-only */
+  --focus-ring: 0 0 0 var(--px) var(--c-anvil), 0 0 0 calc(var(--px) * 2) var(--c-spark);
+
+  /* Placeholder type stack. Real self-hosted pixel faces (Press Start 2P,
+     Pixelify Sans, Silkscreen, VT323) arrive in U-002 as subset .woff2 with no
+     third-party requests. Monospace keeps glyphs on-grid meanwhile. */
+  --font-display: ui-monospace, "Cascadia Mono", "Segoe UI Mono", "DejaVu Sans Mono", monospace;
+  --font-ui: var(--font-display);
+
+  /* Stepped motion — snap, never ease (no cubic-bezier anywhere on chrome) */
+  --step-fast: steps(2, end);
+  --step-blink: steps(1, end);
+
+  color-scheme: dark;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--c-anvil);
+  color: var(--c-steel);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  line-height: 1.4;
+  -webkit-font-smoothing: none;
+  image-rendering: pixelated;
+  text-rendering: optimizeSpeed;
+}
+
+/* Keyboard-first visible focus ring (WCAG 2.2 AA) */
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+/* Disable all ambient motion when the user prefers reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

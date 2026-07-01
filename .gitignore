@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+
+# Test / coverage artifacts
+coverage/
+playwright-report/
+playwright/.cache/
+test-results/
+blob-report/
+
+# TypeScript incremental build info
+*.tsbuildinfo
+.tmp/
+
+# Environment (keep .env.example tracked)
+.env
+.env.*
+!.env.example
+
+# Codex advisory scratch (never committed)
+.codex-out.md
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+*.local
+.vite/

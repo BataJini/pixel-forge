@@ -1,0 +1,6 @@
+# Cloudflare Pages security headers (ignored by GitHub Pages, harmless there).
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: no-referrer
+  X-Frame-Options: DENY
+  Permissions-Policy: geolocation=(), microphone=(), camera=()

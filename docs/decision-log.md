@@ -1,9 +1,127 @@
-# Decision Log — <PROJECT>
+# Decision Log — PixelForge
 
 ADR style. Newest first.
 
-## ADR-001 — <title>  (<date>)
-- Context:
-- Decision:
-- Rationale:
-- Consequences:
+## ADR-008 — U-001 integration: verified scaffold, deferred CI-branch reconcile  (2026-07-01)
+- **Context:** U-001 (scaffold + tooling + CI/deploy) passed Reviewer + QA + the
+  objective gate on fix-worktree `wf_023eceaa-423-6` (the `-2` worktree failed on
+  four blockers and was superseded). Integrating into `master`. Two open items
+  surfaced that don't block the unit: (a) the CI/deploy workflow targets `main`
+  while the integration branch is `master` (Reviewer F-1, MEDIUM); (b) `biome check .`
+  from the repo root fails because it descends into the in-repo build worktrees under
+  `.claude/worktrees/` and finds their nested `biome.json`.
+- **Decision:** Mark U-001 **verified** on the strength of the deliverable itself —
+  post-merge `npm ci`/`build`/`test`/`typecheck` all exit 0 in `master`, artifacts
+  present, and the committed source lints clean when scoped to the deliverable
+  (`biome check src test e2e <configs>` → exit 0). Do **not** hold the unit on F-1;
+  reconcile the CI branch (rename `master`→`main` on first push to a remote, or
+  repoint the workflow trigger/deploy guard to `master`) as a pre-deploy task folded
+  into U-012/U-013. Treat the `biome check .` root failure as an environment artifact
+  of in-repo worktrees, not a code defect (CI runs a clean checkout with no
+  worktrees). Ideal hardening (add `.claude/` to `.gitignore` + `biome.json` ignores)
+  is deferred to a code agent — Doc scope is docs-only.
+- **Rationale:** The objective gate is about the deliverable's real build/test/artifact
+  state, which is green. Neither open item affects correctness of the scaffold; both
+  are localized, documented, and cheaper to resolve alongside the units that actually
+  exercise deploy/tooling. No remote is configured yet, so the `main`/`master`
+  mismatch is inert today.
+- **Consequences:** CI/deploy will not fire until the branch names are reconciled;
+  flagged in work-breakdown (F-1) and lessons so it isn't forgotten before first
+  deploy. Local `npm run lint` may show a false failure while worktrees exist under
+  `.claude/`; verify lint against the committed source or in CI until `.claude/` is
+  ignored.
+
+## ADR-007 — Intake answers folded in (7 decisions)  (2026-07-01)
+- **Context:** The human answered the batched intake questions.
+- **Decisions:**
+  1. **Hero vibe = Arcade CRT** as the DEFAULT theme (neon-on-black, scanlines/glow
+     forward) over the bespoke **Forge** structural chrome. Forge + hardware
+     palettes (Game Boy, PICO-8, NES, C64, CGA, Amber) remain switchable.
+  2. **Clean-export invariant** (hard rule): CRT scanlines/glow/bloom/flicker/
+     curvature and the checkerboard are a display-only layer that never touches the
+     pixel buffers and never appears in any export (PNG/SVG/GIF/spritesheet/`.forge`).
+     A CRT toggle (Off/Subtle/Full) + one-click clean mode; honors reduced-motion.
+  3. **Touch:** desktop-first, touch works (pinch-zoom, two-finger pan; not deeply
+     tuned).
+  4. **Animation:** full — frames + onion skin + GIF + spritesheet (U-008, U-010
+     stay in).
+  5. **Layers:** full stack (opacity, reorder, merge, flatten) — U-007 stays in.
+  6. **Max canvas raised 256 → 512** (presets 8→128 + hardware presets + custom up
+     to 512). Perf targets, history memory budget, GIF/onion-skin compositing, and
+     acceptance tests updated for the 512² ceiling.
+  7. **Palettes:** free RGBA color + built-in classics; indexed/lock mode available
+     but OFF by default.
+  8. **Local-only:** no accounts, IndexedDB, offline PWA, no backend.
+- **Consequences:** design-direction, master-spec, constitution (v1.1), work-
+  breakdown, and held-out tests updated. Unit set unchanged (13). Phase → building.
+
+## ADR-006 — Fully client-side, no accounts, local-only storage  (2026-07-01)
+- **Context:** The idea is a personal drawing tool. Cloud/accounts add backend,
+  auth, privacy, and cost surface with little core value for v1.
+- **Decision:** 100% static SPA, no backend, no accounts. All persistence local
+  (IndexedDB). No telemetry that leaves the device. Deploy as static assets.
+- **Rationale:** First-principles — nothing in "draw pixels, export PNG/SVG"
+  needs a server. Local-first is faster, private, offline-capable, free to host.
+- **Consequences:** No cross-device sync/gallery-sharing in v1 (possible later).
+  Export/import files and a JSON project format are the interchange mechanism.
+
+## ADR-005 — Undo/redo via dirty-rect patch commands (hybrid)  (2026-07-01)
+- **Context:** Full-buffer snapshots per stroke blow memory (256×256 RGBA = 256KB
+  ×layers×frames); pure command inverse logic is fiddly per tool.
+- **Decision:** Each undoable edit is a command storing only the dirty rect's
+  before/after typed-array patch + `{x,y,w,h,layerId,frameId}`. Undo/redo blit
+  the patch. Structural ops (layer/frame add/remove/reorder, resize) are
+  full-object commands with explicit inverse. Cap depth (default 100) and total
+  bytes; a drag coalesces into one command on pointerup.
+- **Rationale:** Cheap, uniform across tools, immutable-friendly (frozen patches).
+- **Consequences:** Patch apply/invert must be exact and covered by held-out tests.
+
+## ADR-004 — Bespoke "Forge" visual identity + themable hardware palettes  (2026-07-01)
+- **Context:** Competitors (Piskel utilitarian, Pixilart busy-social, Lospec
+  clean-but-frozen) commit to no strong game-console identity. The idea asks for
+  "retro game style."
+- **Decision:** Invent a bespoke blacksmith-forge identity (ember-on-iron, temp
+  metaphor) as the default chrome, with selectable hardware palettes (Game Boy,
+  PICO-8, NES, C64, CGA, Amber) that can retheme the whole UI accent ramp. Canvas
+  art is never tinted by chrome colors. See design-direction.md.
+- **Rationale:** Ownable, ties to the "forge" slug, differentiates from all three
+  competitors, and turns palette-choice into a signature feature.
+- **Consequences:** More design work (bespoke tokens, icons) but no stock-kit look.
+
+## ADR-003 — Export formats: PNG (scaled) + SVG + GIF + spritesheet + JSON  (2026-07-01)
+- **Context:** Idea requires PNG + SVG "etc." Research shows table-stakes exports.
+- **Decision:** PNG (integer nearest-neighbor scale 1–32×, transparent bg), SVG
+  (greedy rect-merge, `crispEdges`), animated GIF (gifenc in a Web Worker),
+  spritesheet PNG + Aseprite-style JSON atlas, and a native `.forge` JSON project
+  (lossless: layers, frames, palette, tags). Import: PNG, and palettes (.hex/.gpl/
+  .pal). All client-side, no server.
+- **Rationale:** Matches user expectations and game pipelines; all hand-rollable
+  except GIF (gifenc chosen: fastest, MIT, no-dither is ideal for pixel art).
+- **Consequences:** GIF/spritesheet depend on the animation-frames feature.
+
+## ADR-002 — Rendering: hand-rolled Canvas 2D, three-layer pipeline  (2026-07-01)
+- **Context:** Konva/Fabric/Pixi add weight and fight nearest-neighbor pixel
+  semantics; grid sizes are small enough for Canvas 2D.
+- **Decision:** Source-of-truth OffscreenCanvas/`ImageData` buffers per layer at
+  native art resolution; a display `<canvas>` (`imageSmoothingEnabled=false` + CSS
+  `image-rendering: pixelated`) shows a scaled composite; a transparent overlay
+  canvas draws grid/cursor/marquee. Dirty-rect repaint, rAF-coalesced, `setTransform`
+  pan/zoom. No rendering library.
+- **Rationale:** Simplest thing that is fast enough and pixel-correct.
+- **Consequences:** Compositing/dirty-rect logic is ours to test and optimize.
+
+## ADR-001 — Stack: Vite + React 19 + TypeScript, Zustand, IndexedDB  (2026-07-01)
+- **Context:** Canvas-heavy static SPA. The framework only drives chrome (the
+  canvas is imperative), so choice is a UI-shell + ecosystem decision.
+- **Decision:** Vite 7 + React 19 + TypeScript. Zustand + Immer for UI/document
+  metadata (pixel buffers kept as raw typed arrays *outside* Immer). Storage via
+  IndexedDB (`idb-keyval`), `localStorage` only for tiny prefs; request
+  `navigator.storage.persist()`. gifenc for GIF, `browser-fs-access` for
+  save/open with blob fallback. Tests: Vitest 4 (unit + Browser Mode) + Playwright
+  E2E. Lint/format: Biome. Deploy: Cloudflare Pages (or GitHub Pages with correct
+  Vite `base`).
+- **Rationale:** Deepest ecosystem for undo/redo, panels, color pickers; trivial
+  static deploy; strong pixel-correct testing story (Vitest Browser Mode is a real
+  Chromium so canvas assertions work; jsdom canvas is a stub).
+- **Consequences:** React runtime cost (~45KB gz) accepted; kept off the draw hot
+  path. Svelte 5 recorded as a viable smaller-bundle alternative if revisited.

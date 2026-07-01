@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" shape-rendering="crispEdges" width="16" height="16">
+  <title>PixelForge</title>
+  <rect width="16" height="16" fill="#06070C" />
+  <!-- Anvil silhouette (steel) -->
+  <rect x="3" y="9" width="10" height="2" fill="#E8F0FF" />
+  <rect x="4" y="11" width="8" height="1" fill="#E8F0FF" />
+  <rect x="6" y="12" width="4" height="2" fill="#E8F0FF" />
+  <rect x="2" y="8" width="3" height="1" fill="#E8F0FF" />
+  <!-- Hot spark on the anvil (ember + spark) -->
+  <rect x="7" y="5" width="2" height="2" fill="#00F0FF" />
+  <rect x="8" y="3" width="1" height="2" fill="#FF2E88" />
+</svg>

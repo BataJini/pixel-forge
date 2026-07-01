@@ -1,0 +1,51 @@
+/*
+ * App shell styles — U-001 minimal brand-safe shell.
+ * Tokens only; hard bevels; no border-radius / blur / soft gradient / easing.
+ */
+
+.pf-shell {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  background: var(--c-anvil);
+}
+
+.pf-plate {
+  max-width: 60ch;
+  padding: var(--space-6) var(--space-7);
+  background: var(--c-iron);
+  box-shadow: var(--bevel-raised);
+}
+
+.pf-wordmark {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: var(--px);
+  text-transform: uppercase;
+  color: var(--c-steel);
+}
+
+/* Ember/neon accent expressed as a solid shape (never small colored text) */
+.pf-ingot {
+  width: calc(var(--px) * 24);
+  height: var(--space-2);
+  margin: var(--space-3) 0 var(--space-4);
+  background: var(--c-ember);
+}
+
+.pf-tagline {
+  margin: 0 0 var(--space-4);
+  font-size: 16px;
+  color: var(--c-ash);
+}
+
+.pf-status {
+  margin: 0;
+  font-size: 14px;
+  color: var(--c-ash);
+}
