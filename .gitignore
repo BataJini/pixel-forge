@@ -24,6 +24,12 @@ blob-report/
 # Codex advisory scratch (never committed)
 .codex-out.md
 
+# Project Factory machine-local state (build worktrees, per-unit locks).
+# Each worktree carries its own biome.json; committing/scanning them breaks
+# `biome check .` with a nested-root error. Never committed.
+.claude/
+.factory.lock
+
 # Logs
 *.log
 npm-debug.log*

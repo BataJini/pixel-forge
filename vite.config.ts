@@ -25,7 +25,18 @@ export default defineConfig({
     // Component/DOM behavior is covered by Vitest Browser Mode (test:browser)
     // and Playwright E2E (test:e2e) in real browsers.
     environment: 'node',
-    include: ['src/**/*.test.{ts,tsx}', 'test/**/*.test.{ts,tsx}'],
+    // Held-out acceptance tests live in docs/acceptance/<unit>/ and import the pure
+    // engine by exact path. Each unit ACTIVATES its own held-out suite here once the
+    // modules it targets exist, so `npm test` (and the objective gate) exercises the
+    // authoritative tests for every built unit while leaving future units' tests —
+    // which reference not-yet-built modules — out of the run. Builder never edits the
+    // test files themselves (constitution); activating an already-present file only
+    // makes the independent gate reproducible via `npm test`.
+    include: [
+      'src/**/*.test.{ts,tsx}',
+      'test/**/*.test.{ts,tsx}',
+      'docs/acceptance/U-003/**/*.test.{ts,tsx}',
+    ],
     exclude: ['**/node_modules/**', '**/dist/**', 'e2e/**', '**/*.browser.test.{ts,tsx}'],
     coverage: {
       provider: 'v8',

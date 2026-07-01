@@ -9,6 +9,14 @@
  * establishes the boundary and the shared cross-cutting constants for U-001.
  */
 
+// Engine surface (master-spec §5). Held-out tests import concrete modules by
+// their exact paths (e.g. `src/core/buffer`); this barrel is for app-internal use.
+export * from './buffer';
+export * from './color';
+export * from './rect';
+export * from './types';
+export * from './viewport';
+
 /** Stable module marker (lets the boundary be asserted from a test). */
 export const CORE_MODULE = 'pixel-forge/core' as const;
 

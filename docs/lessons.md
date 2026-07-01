@@ -30,6 +30,28 @@ unit is verified, especially after a fix that took several iterations.
   actually contains commits (`git log master..<branch>`); if the deliverable is uncommitted,
   stage+commit it on the branch first, then `git merge --squash` for a single clean integrate
   commit. Always re-check `git status`/`--stat` after the merge to confirm the files really landed.
+- **A worktree branched from an older base needs genuine-diff filtering, not a raw merge (U-003).**
+  `wf_023eceaa-423-13` was cut from the U-001 base (`a21e10e`) *before* U-002 landed, and
+  predates `.gitattributes` (`eol=lf`), so its working tree showed ~20 files as "modified"
+  that were **pure CRLF churn** plus a handful of real edits. A blind `git merge`/`--squash`
+  would have reverted U-002's genuine changes to `main.tsx`/`index.ts`/`tokens.css` back to the
+  a21e10e line-ending-normalized versions. Process rule: when a unit's base is behind `master`,
+  isolate the real changes with `git diff --ignore-cr-at-eol <base>` first, then apply **only**
+  those (new files + the files with non-whitespace diffs) onto `master`; never trust the raw
+  "modified" set on a pre-`.gitattributes` worktree. Always re-run the full gate after.
+- **Two units can silently fight over the same throwaway preview root (U-003).**
+  Both U-002 and U-003 repurposed `App.tsx`/`App.css` as *their* runnable proof (U-002 →
+  `DesignShowcase`, U-003 → `CanvasStage`), and U-002 had *deleted* `App.css`. Integration is
+  not "pick one": compose them so no verified behavior is lost (U-002's `ThemeProvider`+
+  `CrtOverlay` now wrap U-003's `CanvasStage`), and record which prior preview got unmounted
+  (`DesignShowcase`) so it isn't assumed gone. Process rule: when consecutive units both edit a
+  shared scaffolding entrypoint, expect a *semantic* conflict even when git reports no textual
+  one, and reconcile by composition; defer the real assembly to the designated shell unit (U-012).
+- **The U-001 `biome check .` nested-root fix is now applied (U-003).** Added `.claude/` (+
+  `.factory.lock`) to `.gitignore`; Biome's `useIgnoreFile` now skips the in-repo build
+  worktrees, so `npm run lint` (`biome check .`) passes unscoped (79 files, 0 issues) even with
+  live worktrees present. The earlier "scope the tool / run in a clean checkout" workaround is no
+  longer required for lint. Still prune spent worktrees at integration to keep the tree tidy.
 - **Objective gate must target the winning worktree, not the first one (U-001).**
   The first gate/QA/review artifacts were written against the failed `-2` worktree
   (`artifactsPresent:false`) and had to be explicitly superseded by re-runs against

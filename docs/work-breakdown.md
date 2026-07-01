@@ -7,7 +7,7 @@ The engine builds a unit only when all its deps are `verified`.
 |----|-------|------|----------|--------|
 | U-001 | Project scaffold + tooling + CI/deploy | — | §1 | verified |
 | U-002 | Design system & retro UI chrome (Forge) | U-001 | design-direction, §3 | verified |
-| U-003 | Canvas engine + pixel buffer + render pipeline | U-001 | §3.1, §4.1, §5 | pending |
+| U-003 | Canvas engine + pixel buffer + render pipeline | U-001 | §3.1, §4.1, §5 | verified |
 | U-004 | Drawing tools | U-003 | §3.2, §5 | pending |
 | U-005 | Color & palette system | U-002, U-003 | §3.3, §4.4, §5 | pending |
 | U-006 | History / undo-redo | U-003, U-004 | §3.6, §5 | pending |
@@ -96,6 +96,18 @@ The engine builds a unit only when all its deps are `verified`.
   repaint)**; checkerboard/grid are overlay-only and never in the buffer. Held-out:
   `docs/acceptance/U-003`.
 - Deps: U-001
+- **Status: verified** (2026-07-01, integrated to `master`, 1 iteration — passed
+  Reviewer + QA + objective gate first try on `wf_023eceaa-423-13`). Delivered pure
+  engine (`src/core/{color,buffer,rect,viewport,types}.ts`) + browser glue
+  (`src/platform/{renderer,overlays}.ts`) + runnable preview (`src/ui/CanvasStage`).
+  Integrated via genuine-diff filtering (worktree was cut from the U-001 base, behind
+  U-002) and a composed App root — U-002 `ThemeProvider`+`CrtOverlay` now wrap the
+  U-003 workbench (see ADR-010). Post-merge `master` full gate green: typecheck 0,
+  vitest **138/12** (incl. activated held-out suite), build 0 + `dist/` artifacts,
+  `npm run lint` 0/79, `test:browser` 14/3, `test:e2e` 2 (no console errors).
+  Non-blocking follow-ups: Space+drag / two-finger pan → **U-004/U-012** (engine math
+  ready); `vite.config` held-out `include` → glob, and coverage to `src/platform` →
+  later units; fractional-zoom (<1×) sub-pixel checker seam → optional polish.
 
 ### U-004 — Drawing tools
 - Spec ref: §3.2, §5

@@ -1,0 +1,121 @@
+/*
+ * CanvasStage — the "anvil well" that hosts the U-003 render pipeline preview.
+ * Pure design-token styling (Forge/Arcade ramp): inset bevel, hard edges, no
+ * border-radius or blur. The checkerboard/grid are painted by the renderer on
+ * the backdrop/overlay canvases, never here and never in the pixel buffer.
+ */
+
+.pf-stage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  min-height: 0;
+}
+
+/* Screen-reader-only description (visually hidden, still announced). */
+.pf-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.pf-stage__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pf-stage__group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.pf-stage__spacer {
+  flex: 1 1 auto;
+}
+
+.pf-btn {
+  appearance: none;
+  border: 0;
+  min-width: calc(var(--px) * 14);
+  padding: var(--space-2) var(--space-3);
+  background: var(--c-iron);
+  color: var(--c-steel);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--bevel-raised);
+  transition: transform 80ms var(--step-fast);
+}
+
+.pf-btn:hover {
+  color: var(--c-ember);
+}
+
+.pf-btn:active,
+.pf-btn[aria-pressed="true"] {
+  color: var(--c-anvil);
+  background: var(--c-ember);
+  box-shadow: var(--bevel-inset);
+  transform: translate(var(--px), var(--px));
+}
+
+.pf-swatch {
+  width: var(--space-5);
+  height: var(--space-5);
+  padding: 0;
+  border: 0;
+  box-shadow: var(--bevel-raised);
+  cursor: pointer;
+}
+
+.pf-swatch[aria-pressed="true"] {
+  box-shadow:
+    0 0 0 var(--px) var(--c-anvil),
+    0 0 0 calc(var(--px) * 2) var(--c-spark);
+}
+
+.pf-stage__well {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: calc(var(--px) * 120);
+  background: var(--c-slag);
+  box-shadow: var(--bevel-inset);
+  overflow: hidden;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.pf-stage__well canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+}
+
+.pf-stage__status {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-4);
+  padding: var(--space-2) var(--space-3);
+  background: var(--c-iron);
+  box-shadow: var(--bevel-inset);
+  color: var(--c-ash);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  letter-spacing: 0.02em;
+}
+
+.pf-stage__status b {
+  color: var(--c-steel);
+  font-weight: 600;
+}

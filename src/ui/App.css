@@ -1,0 +1,56 @@
+/*
+ * App shell styles.
+ * Tokens only; hard bevels; no border-radius / blur / soft gradient / easing.
+ * A minimal top bar over a full-height workbench that hosts the canvas engine.
+ */
+
+.pf-app {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--c-anvil);
+}
+
+.pf-topbar {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  padding: var(--space-3) var(--space-5);
+  background: var(--c-iron);
+  box-shadow: var(--bevel-raised);
+}
+
+.pf-wordmark {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: var(--px);
+  text-transform: uppercase;
+  color: var(--c-steel);
+}
+
+/* Ember/neon accent expressed as a solid shape (never small colored text) */
+.pf-ingot {
+  width: calc(var(--px) * 16);
+  height: var(--space-2);
+  background: var(--c-ember);
+}
+
+.pf-tagline {
+  margin: 0;
+  font-size: 14px;
+  color: var(--c-ash);
+}
+
+.pf-workbench {
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+  padding: var(--space-5);
+}
+
+.pf-workbench > .pf-stage {
+  flex: 1 1 auto;
+}

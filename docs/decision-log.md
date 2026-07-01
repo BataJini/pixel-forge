@@ -2,6 +2,49 @@
 
 ADR style. Newest first.
 
+## ADR-010 — U-003 integration: cross-base merge + App-root conflict + `biome check .` fix  (2026-07-01)
+- **Context:** U-003 (canvas engine + pixel buffer + render pipeline) passed
+  Reviewer + QA + the objective gate on the first worktree (`wf_023eceaa-423-13`;
+  no failed sibling). Two integration complications: (1) the worktree branched from
+  the **U-001** base (`a21e10e`) while `master` had already advanced to **U-002**
+  (`8750399`), so a straight merge would drag CRLF-only noise and try to revert
+  U-002's real edits to `main.tsx`/`index.ts`/`tokens.css`; (2) a **semantic
+  conflict** on the app root — U-002 rewrote `App.tsx` to mount its design-system
+  `DesignShowcase` + `CrtOverlay` (and deleted `App.css`), while U-003 repurposed the
+  same `App.tsx`/`App.css` to mount the runnable `CanvasStage` workbench preview.
+  Both are deliberate throwaway scaffolding until U-012 assembles the real shell.
+- **Decision:** Integrate by applying **only the genuine U-003 changes** onto
+  `master` (ignoring pure line-ending diffs): the new `src/core/{buffer,color,rect,
+  types,viewport}.ts` (+tests) and `src/platform/{overlays,renderer}.ts` (+browser
+  test) + `src/ui/CanvasStage.tsx`/`.css`; the additive barrel exports in
+  `src/core/index.ts`/`src/platform/index.ts` (U-002 never touched these); and the
+  `vite.config.ts` held-out `test.include` activation for `docs/acceptance/U-003/**`.
+  Hand-merged `App.tsx` to keep **both** units live: U-002's `ThemeProvider` +
+  always-mounted `CrtOverlay` now wrap U-003's top bar + `CanvasStage` workbench.
+  Re-added U-003's `App.css`. Left U-002's `main.tsx`/`tokens.css`/`index.ts`
+  untouched. Fixed the long-standing `biome check .` nested-root failure by adding
+  `.claude/` (+ `.factory.lock`) to `.gitignore` so Biome's `useIgnoreFile` skips the
+  in-repo build worktrees.
+- **Rationale:** The worktree's "modified" set was almost entirely CRLF churn from a
+  pre-`.gitattributes` base; cherry-applying the real diffs avoids clobbering U-002.
+  Composing (not choosing between) the two preview roots preserves every verified
+  behavior of both units — U-002's theme/CRT chrome and U-003's canvas engine —
+  which is exactly what U-012 will formalize; `CanvasStage` needs no theme context,
+  so the composition is low-risk and was verified end-to-end. Gitignoring `.claude/`
+  is the durable fix flagged (but deferred as out-of-scope) in the U-001 lesson:
+  nothing under `.claude/` was tracked, and CI (clean checkout) never had worktrees.
+- **Consequences:** Post-merge `master` is green on the **full** gate:
+  `typecheck` 0, `vitest` **138/12 files** (incl. the activated held-out U-003
+  acceptance suite), `build` 0 with `dist/` artifacts (JS 65.98 kB gz), **`npm run
+  lint` (`biome check .`) 0 / 79 files** (no longer needs scoping), `test:browser`
+  **14/3**, `test:e2e` **2** with no console errors. U-002's `DesignShowcase` is no
+  longer mounted at the app root (still exported and covered by its own browser
+  test); it returns as a section within U-012's workbench. Advisory findings
+  F-1..F-4 (Space+drag/two-finger pan → U-004/U-012; `vite.config` include glob and
+  `src/platform` coverage → later units; fractional-zoom sub-pixel seam → optional
+  polish) carried forward, none blocking. Master-spec/design-direction unchanged —
+  reality matched the spec; the engine/module boundaries were built as specified.
+
 ## ADR-009 — U-002 integration: verified design system, deferred Forge ash-on-iron contrast  (2026-07-01)
 - **Context:** U-002 (design system & retro UI chrome) passed Reviewer + QA + the
   objective gate on the first worktree (`wf_023eceaa-423-12`; no failed sibling —
