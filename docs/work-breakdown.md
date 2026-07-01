@@ -13,7 +13,7 @@ The engine builds a unit only when all its deps are `verified`.
 | U-006 | History / undo-redo | U-003, U-004 | §3.6, §5 | pending |
 | U-007 | Layers panel & management | U-003, U-006 | §3.4, §4.1 | pending |
 | U-008 | Animation frames + timeline + onion skin | U-003, U-006, U-007 | §3.5 | pending |
-| U-009 | Export: PNG (scaled) + SVG | U-003 | §3.8, §5 | pending |
+| U-009 | Export: PNG (scaled) + SVG | U-003 | §3.8, §5 | verified |
 | U-010 | Export: GIF + spritesheet (+JSON atlas) | U-008, U-009 | §3.8, §5 | pending |
 | U-011 | Project persistence + dialogs + image import | U-003, U-005, U-007 | §2, §3.8, §4.3 | pending |
 | U-012 | App shell: layout, menus, shortcuts, command palette, help | U-002, U-004, U-005, U-006, U-007, U-011 | §2, §3, §3.7 | pending |
@@ -221,15 +221,28 @@ The engine builds a unit only when all its deps are `verified`.
 - Deps: U-003, U-006, U-007
 
 ### U-009 — Export: PNG (scaled) + SVG
+- **Status: verified** (2026-07-01, integrated to `master`, 1 iteration — passed
+  Reviewer + QA + objective gate first try on worktree `wf_023eceaa-423-25`).
+  Delivered `src/core/exporters/{png,svg,index}.ts` (pure), `src/platform/exporters/
+  {encode,save,index}.ts` (`browser-fs-access` + blob fallback, `PNG_SCALES
+  [1,2,4,8,16,32]`), `src/ui/export/ExportDialog.tsx` wired into `CanvasStage.tsx`,
+  and `e2e/export.spec.ts`. Post-merge master gate: typecheck 0, unit 372/26 (incl
+  held-out U-009 3/3), browser 38/8, build 0 + dist artifacts, lint 0/127. Merge was
+  a cross-base 3-way (worktree branched at U-003 `ccb5290`); resolved additive barrel/
+  `vite.config` conflicts and re-pointed the dialog `getSource` from the removed
+  `bufferRef` to `sessionRef.current?.getBuffer()` (U-005 refactor). `npm install`
+  synced the new `browser-fs-access` dep. See ADR-013.
 - Spec ref: §3.8, §5
-- Scope: `png.ts` nearest-neighbor scale export (1–32×, transparent/matte, current/
-  all frames); `svg.ts` greedy rect-merge (`crispEdges`, per-color, omit
-  transparent); download via `browser-fs-access` with blob fallback; export dialogs.
+- Scope: `png.ts` nearest-neighbor scale export (1–32×, transparent/matte); `svg.ts`
+  greedy rect-merge (`crispEdges`, per-color, omit transparent); download via
+  `browser-fs-access` with blob fallback; export dialog.
 - Acceptance criteria: PNG output dims = art×scale and introduces no intermediate
   colors (palette count preserved); SVG parses, has viewBox + crispEdges, merged
   rect count << pixel count for solid art, and re-rasterizes to the source image;
   **exports are effect-free (no CRT scanlines/glow, no checkerboard) and correct at
   512×512** (e.g. 512×512 @ 4× = 2048×2048 PNG). Held-out: `docs/acceptance/U-009`.
+- Deferred (scoped): PNG "all frames → sequence zip" (spec §3.8) — needs animation
+  frames (U-008); lands with U-010. Not a spec change.
 - Deps: U-003
 
 ### U-010 — Export: GIF + spritesheet (+JSON atlas)

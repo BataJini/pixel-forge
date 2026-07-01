@@ -13,6 +13,7 @@
 // their exact paths (e.g. `src/core/buffer`); this barrel is for app-internal use.
 export * from './buffer';
 export * from './color';
+export * from './exporters';
 export * from './palette';
 export * from './path';
 export * from './rect';

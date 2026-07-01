@@ -19,6 +19,7 @@ import {
 import { createRenderer, type PixelRenderer } from '../platform';
 import { type ToolId, ToolSession, type ToolState } from '../state';
 import './CanvasStage.css';
+import { ExportDialog } from './export';
 
 const ART_W = 32;
 const ART_H = 32;
@@ -320,6 +321,7 @@ export function CanvasStage({ paintColor, indexed, palette }: CanvasStageProps =
   const [pos, setPos] = useState<StagePos>({ x: 0, y: 0 });
   const [zoomPct, setZoomPct] = useState(100);
   const [snap, setSnap] = useState<Snapshot | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
 
   // Belt-and-suspenders palette lock: when indexed mode is on the stage snaps the
   // fed foreground to the active palette ITSELF, so off-palette pixels are
@@ -696,6 +698,14 @@ export function CanvasStage({ paintColor, indexed, palette }: CanvasStageProps =
         >
           Clear
         </button>
+        <button
+          type="button"
+          className="pf-btn"
+          aria-haspopup="dialog"
+          onClick={() => setExportOpen(true)}
+        >
+          Export…
+        </button>
       </div>
 
       <div ref={wellRef} className="pf-stage__well">
@@ -735,6 +745,13 @@ export function CanvasStage({ paintColor, indexed, palette }: CanvasStageProps =
           </span>
         )}
       </p>
+
+      <ExportDialog
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        getSource={() => sessionRef.current?.getBuffer() ?? null}
+        title="pixelforge"
+      />
     </section>
   );
 }

@@ -1,0 +1,167 @@
+/*
+ * Export dialog — Forge design system. Hard bevels, integer offsets, stepped
+ * press, Spark focus ring. No border-radius, no blur, no soft gradients.
+ * Segmented controls are native radios (free keyboard + screen-reader grouping)
+ * with a visually-hidden input driving a bevelled face.
+ */
+
+.pf-export .pf-dialog__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  min-width: calc(var(--px) * 150);
+}
+
+.pf-export__field {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.pf-export__field > .pf-label {
+  color: var(--c-ash);
+  margin-bottom: var(--space-1);
+}
+
+.pf-export__seg,
+.pf-export__bg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+/* Segmented option: visually-hidden radio + bevelled face. */
+.pf-seg {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.pf-seg input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.pf-seg__face {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: calc(var(--px) * 18);
+  padding: var(--space-2) var(--space-3);
+  background: var(--c-iron);
+  color: var(--c-steel);
+  box-shadow: var(--bevel-raised);
+  transition: transform var(--dur-press) var(--step-fast);
+  user-select: none;
+}
+
+.pf-seg:hover .pf-seg__face {
+  color: var(--c-flame);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pf-seg__face {
+    transition: none;
+  }
+}
+
+/* Selected option glows the accent (Ember/neon) with dark text on it. */
+.pf-seg input:checked + .pf-seg__face {
+  background: var(--c-ember);
+  color: var(--c-anvil);
+  box-shadow: var(--bevel-inset);
+  transform: translate(var(--px), var(--px));
+}
+
+.pf-seg input:focus-visible + .pf-seg__face {
+  box-shadow: var(--focus-ring), var(--bevel-raised);
+  outline: none;
+}
+
+.pf-seg input:checked:focus-visible + .pf-seg__face {
+  box-shadow: var(--focus-ring), var(--bevel-inset);
+}
+
+/* Matte color chip — an inset well holding the native color input. */
+.pf-export__matte {
+  display: inline-flex;
+  align-items: center;
+  padding: var(--space-1);
+  background: var(--c-slag);
+  box-shadow: var(--bevel-inset);
+}
+
+.pf-export__matte.is-disabled {
+  opacity: 0.4;
+  filter: grayscale(1);
+}
+
+.pf-export__matte input[type="color"] {
+  inline-size: calc(var(--px) * 16);
+  block-size: calc(var(--px) * 12);
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+
+.pf-export__matte input[type="color"]:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.pf-export__readout {
+  color: var(--c-ash);
+  margin: 0;
+  padding-top: var(--space-1);
+  border-top: var(--px) solid var(--c-slag);
+}
+
+.pf-export__readout b {
+  color: var(--c-steel);
+  font-weight: inherit;
+}
+
+.pf-export__status {
+  margin: 0;
+  min-height: calc(var(--px) * 10);
+}
+
+.pf-export__status--idle,
+.pf-export__status--working {
+  color: var(--c-ash);
+}
+
+.pf-export__status--done {
+  color: var(--c-patina);
+}
+
+.pf-export__status--error {
+  color: var(--c-warning);
+}
+
+/* Local visually-hidden (so the dialog is correct even mounted in isolation). */
+.pf-export .pf-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}

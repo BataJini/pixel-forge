@@ -2,6 +2,35 @@
 
 ADR style. Newest first.
 
+## ADR-013 — U-009 export architecture: pure encoders + platform save glue  (2026-07-01)
+- **Context:** U-009 delivers the first two export formats (PNG scaled + SVG) from
+  ADR-003. Needed a shape that keeps the clean-export invariant enforceable by
+  held-out tests and reusable by U-010 (GIF/spritesheet) and U-011 (.forge).
+- **Decision:** Three layers. (1) Pure core `src/core/exporters/` — `svg.ts`
+  (greedy rect-merge, `shape-rendering="crispEdges"`, one `<g>` per color, omits
+  transparent, partial-alpha → `fill-opacity`) and `png.ts` (`scaleBufferNearest`
+  integer nearest-neighbor, `flattenOnColor` matte, `scaleToCanvas → OffscreenCanvas`);
+  no DOM/React imports so the boundary stays unit-testable. (2) Platform glue
+  `src/platform/exporters/` — `encode.ts` (`bufferToPngBlob`/`bufferToSvgBlob`),
+  `save.ts` (`saveBlob` via `browser-fs-access` with blob fallback, `sanitizeFileName`,
+  `withExtension`), `index.ts` (`exportPngFile`/`exportSvgFile`, `PNG_SCALES =
+  [1,2,4,8,16,32]`). (3) UI `src/ui/export/ExportDialog.tsx`, wired into
+  `CanvasStage.tsx` via an "Export…" toolbar button reading the live composited
+  buffer (`getSource: () => PixelBuffer | null`).
+- **Rationale:** Matches master-spec §3.8/§5 exactly; the pure/platform split lets
+  the held-out acceptance test assert effect-free output (no CRT/checkerboard) on
+  the raw buffer, satisfying the clean-export hard rule. Greedy rect-merge keeps SVG
+  small; integer nearest-neighbor guarantees pixel-correct upscales with no new colors.
+- **Consequences:** Multi-frame PNG "all frames → sequence zip" (spec §3.8) is
+  deferred with U-010/animation (needs frames from U-008); documented as a scoped
+  deferral in work-breakdown, not a spec change. Adds runtime dep `browser-fs-access`.
+- **Integration note:** Worktree `wf_023eceaa-423-25` branched from `master@ccb5290`
+  (U-003) while master had advanced through U-004/U-005; merge into master was a
+  3-way with additive conflicts in `core`/`platform`/`ui` barrels + `vite.config`
+  held-out include (kept both sides), plus one semantic fix — the dialog's `getSource`
+  was wired to the U-003-era `bufferRef` that U-005 had refactored away, re-pointed to
+  `sessionRef.current?.getBuffer() ?? null`. Post-merge master gate all green.
+
 ## ADR-012 — U-005 integration: re-implement palette-lock on U-004's ToolSession (cross-base semantic merge)  (2026-07-01)
 - **Context:** U-005 (color & palette) passed Reviewer + QA + objective gate on
   worktree `-43`, but `-43` was cut from `master@ccb5290` (pre-U-004). Meanwhile

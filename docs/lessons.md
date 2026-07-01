@@ -100,3 +100,19 @@ unit is verified, especially after a fix that took several iterations.
   re-wired deliberately and the migrated browser/e2e tests were re-run to prove the
   palette-lock still holds on the new draw path. Never mark `verified` off the
   worktree's own gate when the base was stale.
+- **A merge updates the manifest, not `node_modules`; sync deps before trusting the
+  post-merge gate — and trust the compiler over git's "clean merge" (U-009).** U-009
+  added a runtime dep (`browser-fs-access`) in the worktree, so its upstream gate was
+  green *because that worktree had already `npm install`ed it*. Merging into `master`
+  brought the new `package.json`/`package-lock.json` entries but **not** the installed
+  package, so the very first post-merge `npm run typecheck` failed with a false red
+  (`Cannot find module 'browser-fs-access'`) that had nothing to do with the code.
+  Process rule for the Doc/integrator: whenever a merge touches `package.json`/lock,
+  run `npm install` to reconcile `node_modules` *before* running the gate, then re-run
+  from clean — do not diagnose the code off an unsynced environment. Second half of the
+  same lesson: git resolved most of `CanvasStage.tsx` as a *clean* textual 3-way merge
+  yet left a dangling reference — the dialog's `getSource` still pointed at the U-003-era
+  `bufferRef` that U-005 had refactored into `sessionRef.current.getBuffer()`. No
+  conflict marker flagged it; only `tsc` did. A conflict-marker-free merge is not a
+  correct merge — a green typecheck/build on the merged tree is the real proof, so run
+  it even when `git merge` reports zero conflicts.

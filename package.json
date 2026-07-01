@@ -25,6 +25,7 @@
     "format:check": "biome format ."
   },
   "dependencies": {
+    "browser-fs-access": "^0.38.0",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
   },
