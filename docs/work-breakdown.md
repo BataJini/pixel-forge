@@ -10,7 +10,7 @@ The engine builds a unit only when all its deps are `verified`.
 | U-003 | Canvas engine + pixel buffer + render pipeline | U-001 | §3.1, §4.1, §5 | verified |
 | U-004 | Drawing tools | U-003 | §3.2, §5 | verified |
 | U-005 | Color & palette system | U-002, U-003 | §3.3, §4.4, §5 | verified |
-| U-006 | History / undo-redo | U-003, U-004 | §3.6, §5 | pending |
+| U-006 | History / undo-redo | U-003, U-004 | §3.6, §5 | verified |
 | U-007 | Layers panel & management | U-003, U-006 | §3.4, §4.1 | pending |
 | U-008 | Animation frames + timeline + onion skin | U-003, U-006, U-007 | §3.5 | pending |
 | U-009 | Export: PNG (scaled) + SVG | U-003 | §3.8, §5 | verified |
@@ -187,6 +187,34 @@ The engine builds a unit only when all its deps are `verified`.
     L-B `readTextFile` should size-check before reading the whole file (→ U-011 import).
 
 ### U-006 — History / undo-redo
+- **Status: verified** (2026-07-01, integrated to `master`, 2 iterations — original
+  build `wf_023eceaa-423-51`, fix build `wf_023eceaa-423-55` after the first Review
+  FAILED on a single HIGH: a flaky `e2e/history.spec.ts` baseline sampled before the
+  display canvas finished first paint (~25%/run under 6-worker load). The fix was
+  test-only — a deterministic `settledSignature` poll (non-zero AND stable across two
+  reads) in `beforeEach` and both baseline samples; **no production undo/redo logic
+  changed between `-51` and `-55`**. Reviewer re-hammered the e2e suite 84× under
+  6-worker load, 0 failures.) Delivered pure `src/core/history.ts`
+  (`makePatch`/`applyPatch`/`invertPatch`/`patchByteSize`/`pixelRect` dirty-rect
+  patches, reversible `applyListEdit` insert/remove/move/replace algebra for future
+  structural undo, `capByBudget` depth+byte eviction, `DEFAULT_HISTORY_DEPTH=100`,
+  `DEFAULT_HISTORY_MAX_BYTES=64MiB`), stateful `src/state/historyStore.ts`
+  (`History` stacks, redo-clear on record, coalesce-by-key, `snapshot()`),
+  `src/state/toolSession.ts` integration (`attachHistory`, `beginEdit`/`settleEdit`
+  gesture→one-patch, recording for pencil/eraser/line/rect/ellipse/fill/move/nudge/
+  cut/paste/clear, `applyHistoryPatch`), and `CanvasStage.tsx` window-level
+  Ctrl/Cmd+Z · Ctrl+Shift+Z · Ctrl+Y bindings (text-field-guarded) + "Edit history"
+  toolbar. Squash-merged clean (worktree base == master `cb66d7d`, zero conflicts,
+  no dep changes). Post-merge master gate: build 0 (`tsc -b` + `vite build`, dist
+  index JS 279.00 kB / 88.64 kB gz), unit 419/30 (incl held-out U-006 5/5), reward-
+  hack scan clean. See ADR-014.
+- Deferred (scoped — dependency-graph, not a spec change): the §3.6 "structural
+  ops (add/remove/reorder **layer & frame**, resize, **palette change**) undo/redo"
+  list is only partially exercisable at U-006 — **paste/cut/move/clear are wired &
+  live-verified**; layer-op undo re-verifies in **U-007**, frame-op in **U-008**,
+  resize/crop in **U-011**, and palette-change history in **U-012** (all consume the
+  delivered, round-trip-tested `applyListEdit` / `replaceBufferWithHistory`
+  primitives). N-1/F-2/F-3/F-4 advisories carried forward there.
 - Spec ref: §3.6, §5
 - Scope: `src/core/history.ts` (makePatch/applyPatch, dirty-rect patches),
   structural command objects (layer/frame/resize/paste), undo/redo stacks, depth/

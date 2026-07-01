@@ -2,6 +2,45 @@
 
 ADR style. Newest first.
 
+## ADR-014 — U-006 history: pure patch/list-edit core + stateful store + session wiring  (2026-07-01)
+- **Context:** Implement ADR-005 (dirty-rect patch commands) as the undo/redo engine.
+  Needed a shape that keeps the pure/stateful boundary (constitution §5), proves the
+  "1px edit stores only its sub-rect" memory guarantee under held-out tests, and hands
+  future structural-undo units (U-007 layers, U-008 frames, U-011 resize) a reusable
+  reversible primitive.
+- **Decision:** Three layers. (1) Pure core `src/core/history.ts` — `makePatch`
+  (before/after typed-array bytes for the dirty rect only; `null` on no-op),
+  `applyPatch` (bounds-safe blit returning a NEW buffer), `invertPatch`,
+  `patchByteSize`, `pixelRect`; a reversible ordered-list algebra `applyListEdit`
+  (insert/remove/move/replace → new list + exact inverse) for layer/frame structural
+  undo; `capByBudget` (depth + total-byte eviction, oldest-first, always keep newest);
+  `DEFAULT_HISTORY_DEPTH=100`, `DEFAULT_HISTORY_MAX_BYTES=64 MiB`. (2) Stateful
+  controller `src/state/historyStore.ts` — `History` undo/redo stacks, redo-clear on
+  record, coalesce-by-`coalesceKey`, cap enforcement, `snapshot()` for UI. (3) Session
+  glue in `src/state/toolSession.ts` — `attachHistory`, `beginEdit`/`settleEdit` so a
+  whole gesture accumulates ONE patch, recording across pencil/eraser/line/rect/
+  ellipse/fill/move/nudge/cut/paste/clear, `applyHistoryPatch` (blit+repaint). UI:
+  window-level Ctrl/Cmd+Z · Ctrl+Shift+Z · Ctrl+Y (text-field-guarded) + "Edit history"
+  toolbar in `CanvasStage.tsx`.
+- **Rationale:** Matches ADR-005 and master-spec §3.6/§5; the pure core lets held-out
+  tests assert exact undo/redo restore + sub-rect memory bound with no DOM; a single
+  settle-per-gesture is the correct "drag = one entry" model; `applyListEdit` lets the
+  structural units invert list ops without re-deriving inverse logic per unit.
+- **Consequences:** The §3.6 structural-undo list is only partially exercisable now —
+  paste/cut/move/clear are wired & live; **layer (U-007), frame (U-008), resize
+  (U-011), and palette-change (U-012) undo must re-verify against the delivered
+  primitives** (advisories N-1/F-2/F-3/F-4). Not a spec change — same dependency-order
+  scoping applied to U-009's multi-frame export. `History.record` coalescing keeps
+  `prev.undo`+`entry.redo`, which is unsafe for **disjoint** patch rects (dead code at
+  U-006; `recordPatch` never sets `coalesceKey`) — U-007/U-008 must union rects if they
+  adopt patch coalescing.
+- **Integration note:** Reviewer directed integrating the **fix build** `-55` (not the
+  original `-51`); they differ only in `e2e/history.spec.ts` (added deterministic
+  `settledSignature` first-paint poll — the H-1 flake fix) and a `coalesceKey` contract
+  doc-comment. Both worktrees branched from `master@cb66d7d` with no other unit merged
+  since, so the squash-merge was conflict-free with no dep changes. Post-merge master
+  gate all green (build 0, unit 419/30 incl held-out U-006 5/5, reward-hack scan clean).
+
 ## ADR-013 — U-009 export architecture: pure encoders + platform save glue  (2026-07-01)
 - **Context:** U-009 delivers the first two export formats (PNG scaled + SVG) from
   ADR-003. Needed a shape that keeps the clean-export invariant enforceable by

@@ -17,7 +17,7 @@ import {
   zoomAt,
 } from '../core';
 import { createRenderer, type PixelRenderer } from '../platform';
-import { type ToolId, ToolSession, type ToolState } from '../state';
+import { History, type HistorySnapshot, type ToolId, ToolSession, type ToolState } from '../state';
 import './CanvasStage.css';
 import { ExportDialog } from './export';
 
@@ -191,12 +191,31 @@ const LETTER_TOOLS: Record<string, ToolId> = {
 };
 
 /** Wire the keyboard map (window-level, ignoring form fields); returns detacher. */
-function attachKeyboard(session: ToolSession, setSpace: (v: boolean) => void): () => void {
+function attachKeyboard(
+  session: ToolSession,
+  history: History,
+  setSpace: (v: boolean) => void,
+): () => void {
   const onKeyDown = (e: KeyboardEvent): void => {
     if (isTextTarget(e.target)) {
       return;
     }
     const mod = e.ctrlKey || e.metaKey;
+    // Undo (Ctrl/Cmd+Z), Redo (Ctrl/Cmd+Shift+Z or Ctrl/Cmd+Y) — master-spec §3.6.
+    if (mod && e.key.toLowerCase() === 'z') {
+      e.preventDefault();
+      if (e.shiftKey) {
+        history.redo();
+      } else {
+        history.undo();
+      }
+      return;
+    }
+    if (mod && e.key.toLowerCase() === 'y') {
+      e.preventDefault();
+      history.redo();
+      return;
+    }
     if (mod && e.key.toLowerCase() === 'a') {
       e.preventDefault();
       session.selectAllPixels();
@@ -313,6 +332,7 @@ export function CanvasStage({ paintColor, indexed, palette }: CanvasStageProps =
   const overlayRef = useRef<HTMLCanvasElement>(null);
   const rendererRef = useRef<PixelRenderer | null>(null);
   const sessionRef = useRef<ToolSession | null>(null);
+  const historyRef = useRef<History | null>(null);
   const spaceRef = useRef(false);
   // The palette currently baked into the buffer while indexed mode is on; `null`
   // when free-color, so re-entering indexed mode re-quantizes from scratch.
@@ -321,6 +341,7 @@ export function CanvasStage({ paintColor, indexed, palette }: CanvasStageProps =
   const [pos, setPos] = useState<StagePos>({ x: 0, y: 0 });
   const [zoomPct, setZoomPct] = useState(100);
   const [snap, setSnap] = useState<Snapshot | null>(null);
+  const [hist, setHist] = useState<HistorySnapshot | null>(null);
   const [exportOpen, setExportOpen] = useState(false);
 
   // Belt-and-suspenders palette lock: when indexed mode is on the stage snaps the
@@ -350,6 +371,12 @@ export function CanvasStage({ paintColor, indexed, palette }: CanvasStageProps =
     seedForgeMotif(buffer);
     const session = new ToolSession(renderer, buffer, {}, () => setSnap(readSnapshot(session)));
     sessionRef.current = session;
+    // Undo/redo (U-006): the seeded motif is the baseline (not itself an undo
+    // entry); every editing op from here records ONE reversible entry.
+    const history = new History({ onChange: (h) => setHist(h.snapshot()) });
+    session.attachHistory(history);
+    historyRef.current = history;
+    setHist(history.snapshot());
     // A freshly seeded buffer is not yet quantized to any palette, so clear the
     // applied-palette marker; the indexed effect (which runs right after this one)
     // then re-quantizes if the lock is on. Guards the StrictMode remount, where the
@@ -374,7 +401,7 @@ export function CanvasStage({ paintColor, indexed, palette }: CanvasStageProps =
       { renderer, session, onPos: setPos },
       () => spaceRef.current,
     );
-    const detachKeyboard = attachKeyboard(session, (v) => {
+    const detachKeyboard = attachKeyboard(session, history, (v) => {
       spaceRef.current = v;
     });
 
@@ -385,6 +412,7 @@ export function CanvasStage({ paintColor, indexed, palette }: CanvasStageProps =
       renderer.dispose();
       rendererRef.current = null;
       sessionRef.current = null;
+      historyRef.current = null;
     };
   }, []);
 
@@ -477,7 +505,8 @@ export function CanvasStage({ paintColor, indexed, palette }: CanvasStageProps =
         rectangle/ellipse, I eyedropper, M select, V move, H pan; X swaps colors; square brackets
         change brush size; Control-A selects all, Escape deselects; Control-C copies, Control-X
         cuts, and Control-V pastes the selection as a floating selection; arrow keys nudge the Move
-        tool or the floating selection, and Enter stamps it down; hold Space to pan.
+        tool or the floating selection, and Enter stamps it down; hold Space to pan. Control-Z
+        undoes and Control-Shift-Z or Control-Y redoes the last edit; a whole drag is one undo step.
       </p>
 
       <div className="pf-stage__toolbar" role="toolbar" aria-label="Drawing tools">
@@ -494,6 +523,32 @@ export function CanvasStage({ paintColor, indexed, palette }: CanvasStageProps =
               {t.label}
             </button>
           ))}
+        </div>
+      </div>
+
+      <div className="pf-stage__toolbar" role="toolbar" aria-label="Edit history">
+        <div className="pf-stage__group">
+          <button
+            type="button"
+            className="pf-btn"
+            title={hist?.undoLabel ? `Undo ${hist.undoLabel} (Ctrl+Z)` : 'Undo (Ctrl+Z)'}
+            disabled={!hist?.canUndo}
+            onClick={() => historyRef.current?.undo()}
+          >
+            Undo
+          </button>
+          <button
+            type="button"
+            className="pf-btn"
+            title={hist?.redoLabel ? `Redo ${hist.redoLabel} (Ctrl+Y)` : 'Redo (Ctrl+Shift+Z)'}
+            disabled={!hist?.canRedo}
+            onClick={() => historyRef.current?.redo()}
+          >
+            Redo
+          </button>
+          <span className="pf-stage__hint">
+            {hist ? `${hist.depth} step${hist.depth === 1 ? '' : 's'}` : ''}
+          </span>
         </div>
       </div>
 
@@ -694,7 +749,7 @@ export function CanvasStage({ paintColor, indexed, palette }: CanvasStageProps =
         <button
           type="button"
           className="pf-btn"
-          onClick={() => session?.setBuffer(createBuffer(ART_W, ART_H))}
+          onClick={() => session?.replaceBufferWithHistory(createBuffer(ART_W, ART_H), 'Clear')}
         >
           Clear
         </button>

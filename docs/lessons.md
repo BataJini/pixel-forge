@@ -116,3 +116,22 @@ unit is verified, especially after a fix that took several iterations.
   conflict marker flagged it; only `tsc` did. A conflict-marker-free merge is not a
   correct merge — a green typecheck/build on the merged tree is the real proof, so run
   it even when `git merge` reports zero conflicts.
+- **When a unit re-enters the loop over a FLAKY test, integrate the reviewer-named fix
+  build and prove the code is untouched — never trust the earliest-recorded gate (U-006).**
+  U-006's first gate/verifier evidence pointed at worktree `-51`, but that build FAILED
+  Review on a HIGH: a race-flaky `e2e/history.spec.ts` (baseline sampled before first
+  paint, ~25%/run under 6-worker load). The builder produced a superset fix build `-55`,
+  and the Reviewer explicitly instructed "integrate `-55`, not `-51`." A stale reading of
+  the objective-gate JSON (which named `-51`) would have merged the flaky build. Process
+  rules for the Doc/integrator: (a) read the **Review verdict's handoff line** for which
+  worktree to integrate — the gate JSON may reference an earlier sibling; the newest
+  Reviewer-blessed build wins. (b) For a flake fix, confirm it is **test-only** before
+  merging: `diff` the production files between the original and fix worktrees
+  (`-51` vs `-55` differed only in the e2e spec + a doc-comment; zero undo/redo logic
+  changed) — a test-only delta means the already-verified engine still holds and you are
+  not re-validating logic, only de-flaking. (c) A single green gate does NOT clear a
+  flake — the Reviewer's 84× stress run under the exact 6-worker load (0 failures, incl.
+  16 runs of the previously-flaky test) is the evidence that closes it; a lone pass could
+  be the ~75% that happened to succeed. (d) Still re-run the full gate on merged `master`
+  regardless (build 0 / 419 tests / reward-hack clean here) — integration is only proven
+  on the merged tree, per the standing rule above.

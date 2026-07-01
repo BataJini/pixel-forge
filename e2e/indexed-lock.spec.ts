@@ -102,8 +102,10 @@ test('locked: palette-lock quantizes existing art and blocks off-palette drawing
   // Turn palette-lock ON → the existing off-palette magenta is quantized away.
   await page.locator('.pf-palmenu button', { hasText: 'Indexed' }).click();
   await expect.poll(() => displayColors(page)).not.toContain(MAGENTA);
+  // Poll the probe read too: the quantize repaint is rAF-coalesced, so a one-shot
+  // read can race an in-flight frame and momentarily see a transparent pixel.
+  await expect.poll(() => displayPixelAt(page, pt)).not.toBeNull();
   const snapped = await displayPixelAt(page, pt);
-  expect(snapped).not.toBeNull();
   expect(GAMEBOY).toContain(snapped); // the probe pixel is now a Game Boy color
 
   // Drawing again with the off-palette foreground cannot re-introduce it.

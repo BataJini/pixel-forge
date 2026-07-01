@@ -7,7 +7,7 @@
     { "id": "U-003", "title": "Canvas engine + pixel buffer + render pipeline", "deps": ["U-001"], "status": "verified", "iterations": 1 },
     { "id": "U-004", "title": "Drawing tools", "deps": ["U-003"], "status": "verified", "iterations": 2 },
     { "id": "U-005", "title": "Color & palette system", "deps": ["U-002", "U-003"], "status": "verified", "iterations": 3 },
-    { "id": "U-006", "title": "History / undo-redo", "deps": ["U-003", "U-004"], "status": "pending", "iterations": 0 },
+    { "id": "U-006", "title": "History / undo-redo", "deps": ["U-003", "U-004"], "status": "verified", "iterations": 2 },
     { "id": "U-007", "title": "Layers panel & management", "deps": ["U-003", "U-006"], "status": "pending", "iterations": 0 },
     { "id": "U-008", "title": "Animation frames + timeline + onion skin", "deps": ["U-003", "U-006", "U-007"], "status": "pending", "iterations": 0 },
     { "id": "U-009", "title": "Export: PNG (scaled) + SVG", "deps": ["U-003"], "status": "verified", "iterations": 1 },

@@ -188,3 +188,12 @@
   color: var(--c-steel);
   font-weight: 600;
 }
+
+/* Undo/redo depth readout — supplementary, contrast-safe on the iron toolbar. */
+.pf-stage__hint {
+  color: var(--c-steel);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  letter-spacing: 0.02em;
+  padding-inline: var(--space-2);
+}

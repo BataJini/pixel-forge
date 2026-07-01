@@ -18,6 +18,16 @@ export {
   RESET_FG,
 } from './colorStore';
 export {
+  History,
+  type HistoryEntry,
+  type HistoryOptions,
+  type HistorySink,
+  type HistorySnapshot,
+  PREVIEW_FRAME_ID,
+  PREVIEW_LAYER_ID,
+  patchEntry,
+} from './historyStore';
+export {
   type PointerMods,
   type RenderTarget,
   type ToolId,

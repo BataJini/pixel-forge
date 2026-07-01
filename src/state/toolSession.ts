@@ -21,6 +21,7 @@ import {
   extractRegion,
   floodFillInto,
 } from '../core/buffer';
+import { applyPatch, makePatch, type Patch } from '../core/history';
 import { type Point2, snapLineEndpoint } from '../core/path';
 import { clampRect, isEmptyRect, makeRect, rectFromPoints, unionRect } from '../core/rect';
 import {
@@ -41,6 +42,7 @@ import {
   translateBuffer,
 } from '../core/tools';
 import type { PixelBuffer, Rect, RGBA, Selection } from '../core/types';
+import { type HistorySink, PREVIEW_FRAME_ID, PREVIEW_LAYER_ID, patchEntry } from './historyStore';
 
 /** The ten tools of the belt (master-spec §3.2). */
 export type ToolId =
@@ -146,6 +148,20 @@ function accumulate(a: Rect | null, b: Rect | null): Rect | null {
   return unionRect(a, b);
 }
 
+/** Undo-entry label for a just-finished direct-mutation gesture, or null. */
+function gestureLabel(g: Gesture): string | null {
+  if (g.kind === 'freehand') {
+    return g.color === TRANSPARENT ? 'Erase' : 'Pencil';
+  }
+  if (g.kind === 'shape') {
+    return g.tool === 'line' ? 'Line' : g.tool === 'rect' ? 'Rectangle' : 'Ellipse';
+  }
+  if (g.kind === 'move') {
+    return 'Move';
+  }
+  return null;
+}
+
 /** The point transforms implied by the enabled mirror axes (1, 2, or 4). */
 function mirrorTransforms(w: number, h: number, m: MirrorConfig): Transform[] {
   const rx: Transform = (p) => ({ x: w - 1 - p.x, y: p.y });
@@ -189,6 +205,14 @@ export class ToolSession {
   private pendingSelectRect: Rect | null = null;
   private clipboard: Clip | null = null;
   private floating: Floating | null = null;
+  /** Optional undo/redo sink; when null the session records no history (U-006). */
+  private history: HistorySink | null = null;
+  /** Committed buffer snapshot before a direct-mutation edit (freehand/shape/fill). */
+  private editBase: PixelBuffer | null = null;
+  /** Committed buffer snapshot before a floating selection was created (paste/lift). */
+  private floatBase: PixelBuffer | null = null;
+  /** Label to record when the current floating selection is committed. */
+  private floatLabel = 'Paste';
 
   constructor(
     private readonly target: RenderTarget,
@@ -210,20 +234,49 @@ export class ToolSession {
     return this.buffer;
   }
 
+  /**
+   * Attach (or detach with `null`) the undo/redo sink. Once attached, every
+   * committed editing op records a single reversible entry (a drag = one entry;
+   * U-006). Attaching does not retroactively record existing state.
+   */
+  attachHistory(history: HistorySink | null): void {
+    this.history = history;
+  }
+
   /** The active selection, or `null` when nothing is selected. */
   getSelection(): Selection | null {
     return this.selection;
   }
 
-  /** Replace the working buffer (new canvas / resize) and drop any gesture. */
+  /** Replace the working buffer (new canvas / resize) and drop any gesture. Does
+   * NOT record history — use {@link replaceBufferWithHistory} for undoable swaps. */
   setBuffer(buffer: PixelBuffer): void {
     this.buffer = buffer;
     this.gesture = { kind: 'none' };
     this.selection = null;
     this.floating = null;
+    this.editBase = null;
+    this.floatBase = null;
     this.target.setComposite(buffer);
     this.target.setSelectionOverlay?.(null);
     this.onChange();
+  }
+
+  /**
+   * Replace the whole layer buffer as a SINGLE undoable edit (Clear layer, fill
+   * all). Requires the replacement to match the current size (a dimension change
+   * is a structural resize command, handled in U-011). Falls back to
+   * {@link setBuffer} when there is no history or nothing changed.
+   */
+  replaceBufferWithHistory(next: PixelBuffer, label: string): void {
+    const prev = this.buffer;
+    if (this.history && prev.w === next.w && prev.h === next.h) {
+      const patch = makePatch(PREVIEW_LAYER_ID, PREVIEW_FRAME_ID, prev, next);
+      if (patch) {
+        this.recordPatch(patch, label);
+      }
+    }
+    this.setBuffer(next);
   }
 
   /** Whether the clipboard holds pixels that can be pasted. */
@@ -314,9 +367,19 @@ export class ToolSession {
   cut(): boolean {
     if (this.floating) {
       this.copySelection();
+      // Committed change = the layer BEFORE the float (floatBase) → the float's
+      // base (a hole for a lifted selection; unchanged for a pasted float).
+      const base = this.floatBase;
       this.buffer = cloneBuffer(this.floating.base);
       this.floating = null;
       this.selection = null;
+      if (this.history && base) {
+        const patch = makePatch(PREVIEW_LAYER_ID, PREVIEW_FRAME_ID, base, this.buffer);
+        if (patch) {
+          this.recordPatch(patch, 'Cut');
+        }
+      }
+      this.floatBase = null;
       this.target.setComposite(this.buffer);
       this.target.setSelectionOverlay?.(null);
       this.onChange();
@@ -326,10 +389,12 @@ export class ToolSession {
     if (!this.copySelection() || !sel) {
       return false;
     }
+    this.beginEdit();
     const dirty = clearRegionWhere(this.buffer, sel.bounds, (x, y) => selectionContains(sel, x, y));
     if (dirty) {
       this.target.updateRegion(this.buffer, dirty);
     }
+    this.settleEdit('Cut');
     this.selection = null;
     this.target.setSelectionOverlay?.(null);
     this.onChange();
@@ -344,6 +409,10 @@ export class ToolSession {
     }
     this.commitFloating();
     this.update({ tool: 'move' });
+    // Snapshot the committed layer BEFORE the paste, so committing the float later
+    // records the paste as a single 'Paste' undo entry (U-006).
+    this.floatBase = this.history ? cloneBuffer(this.buffer) : null;
+    this.floatLabel = 'Paste';
     this.floating = {
       pixels: cloneBuffer(this.clipboard.pixels),
       base: cloneBuffer(this.buffer),
@@ -380,6 +449,7 @@ export class ToolSession {
       case 'line':
       case 'rect':
       case 'ellipse':
+        this.beginEdit();
         this.gesture = {
           kind: 'shape',
           tool: this.state.tool,
@@ -431,11 +501,18 @@ export class ToolSession {
 
   /** Finish the active gesture. */
   pointerUp(_mods: PointerMods = {}): void {
-    if (this.gesture.kind === 'select') {
+    const g = this.gesture;
+    if (g.kind === 'select') {
       this.commitSelect();
     }
+    // The label for the just-finished direct-mutation gesture, if any. A whole
+    // drag collapses to ONE history entry via this single settle (U-006).
+    const label = gestureLabel(g);
     // A floatMove leaves the selection floating (commit on tool change / Enter).
     this.gesture = { kind: 'none' };
+    if (label) {
+      this.settleEdit(label);
+    }
     this.onChange();
   }
 
@@ -449,12 +526,56 @@ export class ToolSession {
       this.onChange();
       return;
     }
+    this.beginEdit();
     this.buffer = translateBuffer(this.buffer, dx, dy);
     this.target.setComposite(this.buffer);
+    this.settleEdit('Nudge');
     this.onChange();
   }
 
   // ── internals ────────────────────────────────────────────────────────────
+
+  /** Snapshot the committed buffer so a direct-mutation edit can be diffed later. */
+  private beginEdit(): void {
+    if (this.history) {
+      this.editBase = cloneBuffer(this.buffer);
+    }
+  }
+
+  /** Record the change since {@link beginEdit} as ONE undo entry (or nothing). */
+  private settleEdit(label: string): void {
+    const base = this.editBase;
+    this.editBase = null;
+    if (!this.history || !base) {
+      return;
+    }
+    const patch = makePatch(PREVIEW_LAYER_ID, PREVIEW_FRAME_ID, base, this.buffer);
+    if (patch) {
+      this.recordPatch(patch, label);
+    }
+  }
+
+  /** Record a pixel patch as a reversible entry bound to this session's buffer. */
+  private recordPatch(patch: Patch, label: string): void {
+    this.history?.record(patchEntry(patch, (p, dir) => this.applyHistoryPatch(p, dir), label));
+  }
+
+  /**
+   * Apply an undo/redo patch to the live buffer and repaint. Any uncommitted
+   * floating preview is discarded first so undo/redo act on committed pixels only.
+   */
+  private applyHistoryPatch(patch: Patch, dir: 'undo' | 'redo'): void {
+    if (this.floating) {
+      this.buffer = this.floating.base;
+      this.floating = null;
+      this.floatBase = null;
+    }
+    this.gesture = { kind: 'none' };
+    this.buffer = applyPatch(this.buffer, patch, dir);
+    this.target.setComposite(this.buffer);
+    this.target.setSelectionOverlay?.(this.selection ? this.selection.bounds : null);
+    this.onChange();
+  }
 
   private paintColor(): RGBA {
     return this.state.fg;
@@ -465,6 +586,7 @@ export class ToolSession {
   }
 
   private beginFreehand(p: Point2, color: RGBA): void {
+    this.beginEdit();
     const usesBase = this.state.pixelPerfect;
     const base = usesBase ? cloneBuffer(this.buffer) : null;
     this.gesture = { kind: 'freehand', color, base, path: [p], dirty: null };
@@ -598,6 +720,7 @@ export class ToolSession {
     if (this.selection && !selectionContains(this.selection, p.x, p.y)) {
       return; // seed outside the selection: nothing to fill
     }
+    this.beginEdit();
     const base = this.selection ? cloneBuffer(this.buffer) : null;
     const dirty = floodFillInto(this.buffer, p.x, p.y, this.state.fg, {
       tolerance: this.state.tolerance,
@@ -609,6 +732,7 @@ export class ToolSession {
     if (dirty) {
       this.target.updateRegion(this.buffer, dirty);
     }
+    this.settleEdit('Fill');
     this.onChange();
   }
 
@@ -670,6 +794,7 @@ export class ToolSession {
       this.beginFloatMove(p);
       return;
     }
+    this.beginEdit();
     this.gesture = { kind: 'move', start: p, base: cloneBuffer(this.buffer) };
   }
 
@@ -680,6 +805,10 @@ export class ToolSession {
       return;
     }
     const b = sel.bounds;
+    // Snapshot the committed layer BEFORE the lift so a lift+move commits as one
+    // 'Move' entry (erase-here + draw-there restored together on undo; U-006).
+    this.floatBase = this.history ? cloneBuffer(this.buffer) : null;
+    this.floatLabel = 'Move';
     const base = cloneBuffer(this.buffer);
     clearRegionWhere(base, b, (x, y) => selectionContains(sel, x, y));
     const pixels = extractRegion(this.buffer, b, (x, y) => selectionContains(sel, x, y));
@@ -725,7 +854,18 @@ export class ToolSession {
     if (!this.floating || !bounds) {
       return;
     }
+    const base = this.floatBase;
+    const label = this.floatLabel;
     this.floating = null;
+    this.floatBase = null;
+    // The live buffer already reflects base + float; record the net committed
+    // change as ONE entry (a paste or a whole selection move; U-006).
+    if (this.history && base) {
+      const patch = makePatch(PREVIEW_LAYER_ID, PREVIEW_FRAME_ID, base, this.buffer);
+      if (patch) {
+        this.recordPatch(patch, label);
+      }
+    }
     const placed = clampRect(bounds, this.buffer.w, this.buffer.h);
     this.selection = isEmptyRect(placed) ? null : selectRect(this.buffer.w, this.buffer.h, placed);
     this.target.setComposite(this.buffer);
