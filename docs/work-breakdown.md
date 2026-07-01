@@ -9,7 +9,7 @@ The engine builds a unit only when all its deps are `verified`.
 | U-002 | Design system & retro UI chrome (Forge) | U-001 | design-direction, §3 | verified |
 | U-003 | Canvas engine + pixel buffer + render pipeline | U-001 | §3.1, §4.1, §5 | verified |
 | U-004 | Drawing tools | U-003 | §3.2, §5 | verified |
-| U-005 | Color & palette system | U-002, U-003 | §3.3, §4.4, §5 | pending |
+| U-005 | Color & palette system | U-002, U-003 | §3.3, §4.4, §5 | verified |
 | U-006 | History / undo-redo | U-003, U-004 | §3.6, §5 | pending |
 | U-007 | Layers panel & management | U-003, U-006 | §3.4, §4.1 | pending |
 | U-008 | Animation frames + timeline + onion skin | U-003, U-006, U-007 | §3.5 | pending |
@@ -161,6 +161,30 @@ The engine builds a unit only when all its deps are `verified`.
   count; `parsePalette` handles newline-hex/.gpl/.pal and rejects garbage; indexed
   palette-swap remaps art by index. Held-out: `docs/acceptance/U-005`.
 - Deps: U-002, U-003
+- **Status: verified** (2026-07-01, integrated to `master`, 3 iterations). Worktree
+  `-24` failed Review (HIGH H-1: indexed/palette-lock did not restrict live drawing);
+  the fix landed via `-35` (QA) then `-43` (final superset: in-component CanvasStage
+  lock, deep-frozen built-ins, extra browser test). Reviewer + QA + objective gate all
+  PASS on `-43`.
+  - **Integration was a real semantic merge, not a squash.** `-43` was cut from
+    `master@ccb5290` (pre-U-004), so U-004 and U-005 had each independently rewritten
+    `src/ui/CanvasStage.tsx` from the common U-003 base (U-004 → `ToolSession` tool-belt;
+    U-005 → buffer-based palette-lock preview). Reconciled by keeping U-004's
+    `ToolSession` architecture and re-implementing the U-005 palette-lock on it:
+    `seedForgeMotif` seeds the session buffer, an fg-sync effect feeds
+    `effectivePaintColor` → `session.fg` (snapped to palette when locked), and an
+    indexed effect quantizes / `paletteSwap`s `session.getBuffer()` via
+    `session.setBuffer()`. See decision-log ADR-012.
+  - Post-merge master gate: typecheck 0, vitest **338/22** (incl. U-003/4/5 held-out),
+    browser **27/6** (incl. 3 CanvasStage palette-lock tests on the *new* architecture),
+    build 0, e2e **4/4** (incl. `indexed-lock` on the built app), core coverage **97.09%**,
+    lint 0/112.
+  - **Coverage `include` carry-over (was U-002 F-4 → "U-005/U-012"):** U-005 did NOT
+    widen `coverage.include` beyond `src/core/**`; `src/state/colorStore.ts`,
+    `src/platform/{files,recentColors}.ts`, `src/ui/color/**` are exercised by
+    browser + e2e but uncounted. Re-targeted to **U-012/U-013**.
+  - **Advisories carried (non-blocking):** L-A widen coverage include (→ U-012/U-013);
+    L-B `readTextFile` should size-check before reading the whole file (→ U-011 import).
 
 ### U-006 — History / undo-redo
 - Spec ref: §3.6, §5

@@ -2,6 +2,42 @@
 
 ADR style. Newest first.
 
+## ADR-012 — U-005 integration: re-implement palette-lock on U-004's ToolSession (cross-base semantic merge)  (2026-07-01)
+- **Context:** U-005 (color & palette) passed Reviewer + QA + objective gate on
+  worktree `-43`, but `-43` was cut from `master@ccb5290` (pre-U-004). Meanwhile
+  `master` had advanced to `ef6593a` (U-004 integrated). U-004 and U-005 had each
+  *independently rewritten* `src/ui/CanvasStage.tsx` from the shared U-003 base:
+  U-004 turned it into a full `ToolSession`-driven tool belt (`sessionRef`,
+  `session.getBuffer()/setBuffer()`); U-005 turned it into a buffer-based
+  (`bufferRef`) palette-lock preview with its own single-pixel pencil (`colorRef`,
+  `paintIndex`, `erasing`). Neither Reviewer nor QA ever exercised the U-004+U-005
+  combination — they validated U-005 over the *older* tree. `git merge` produced 4
+  conflicts: 3 trivial (`core`/`state` barrels, `vite.config` held-out include) and 1
+  deep (the two divergent CanvasStage implementations).
+- **Decision:** Keep U-004's `ToolSession` architecture as the base and re-implement
+  the U-005 palette-lock on top of it, discarding U-005's now-obsolete buffer/pencil
+  scaffolding (`bufferRef`, `colorRef`, `paintIndex`, `erasing`, `attachInteractions`).
+  Concretely: (a) `seedForgeMotif` now seeds the *session* buffer at mount; (b) an
+  fg-sync effect feeds the panel's `effectivePaintColor` into `session.update({fg})`,
+  re-snapping to the palette in-component when locked (belt-and-suspenders for the
+  H-1 criterion); (c) an indexed effect quantizes / `paletteSwap`s
+  `session.getBuffer()` and commits via `session.setBuffer()`, keyed on
+  `[indexed, palette]` with an `appliedPaletteRef` guard for StrictMode remounts.
+- **Rationale:** U-004's `ToolSession` is the canonical drawing path going forward
+  (all later units build on it); U-005's standalone pencil was only ever a U-003-era
+  preview. Feeding `fg` + snapping there makes the pencil restriction real on the
+  *actual* draw path rather than a parallel one. No `master-spec` change was needed —
+  §3.3/§4.4 describe behavior (exact palettes, indexed lock, palette-swap-by-index)
+  and all of it holds; only the *wiring* changed.
+- **Consequences:** The integrated palette-lock is now covered on the real
+  architecture by the migrated `CanvasStage.browser.test.tsx` (3 tests) and
+  `e2e/indexed-lock.spec.ts`, both green post-merge. The demo `PAINTS` swatches from
+  U-004's CanvasStage remain visible even in controlled mode (harmless; the panel is
+  the source of truth and the fg-sync effect wins on the next change) — cosmetic
+  cleanup deferred to U-012's app-shell pass. Full post-merge gate on `master`:
+  typecheck 0, vitest 338/22, browser 27/6, build 0, e2e 4/4, core coverage 97.09%,
+  lint 0/112.
+
 ## ADR-011 — U-004 integration: clean squash-merge; §3.2 Pencil-Alt deferred  (2026-07-01)
 - **Context:** U-004 (drawing tools) took 2 iterations. The first worktree
   (`wf_023eceaa-423-23`) FAILED Review/QA on a HIGH gap — copy/cut/paste did not

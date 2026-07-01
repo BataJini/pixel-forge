@@ -81,3 +81,22 @@ unit is verified, especially after a fix that took several iterations.
   `git merge --squash` from `master`, then re-run the full gate on `master` before
   flipping status. Confirm base==tip cheaply with `git log master..<branch>` (empty
   before the commit) + an empty `package.json`/lock diff to know the easy path applies.
+- **A worktree cut from an old master must be re-tested *combined with* the units
+  that landed since — Reviewer/QA "PASS" on the stale base is not enough (U-005).**
+  U-005's `-43` worktree branched from `master@ccb5290` (pre-U-004) and was reviewed,
+  QA'd, and gated there. All three passed — but every one of them validated U-005 over
+  a tree that did **not** contain U-004. Because U-004 and U-005 had *independently*
+  rewritten the same file (`src/ui/CanvasStage.tsx`) from the shared U-003 base, the
+  integration was a genuine 3-way semantic merge, and the U-004+U-005 combination had
+  literally never been executed before the Doc agent ran it. Process rules for the
+  Doc/integrator: (a) before trusting a green upstream gate, check the worktree's base
+  (`git merge-base <branch> master`) against the current `master` tip — if it is
+  behind, expect real conflicts and treat the upstream PASS as "passed in isolation,
+  not integrated"; (b) when two units touch the same file from a common ancestor,
+  reconcile onto the *newer* architecture (here U-004's `ToolSession`) and re-implement
+  the older unit's feature on it rather than pasting the older unit's now-divergent
+  code; (c) the only gate that counts for flipping `verified` is the full suite re-run
+  on the merged `master` — here it caught nothing broken only because the feature was
+  re-wired deliberately and the migrated browser/e2e tests were re-run to prove the
+  palette-lock still holds on the new draw path. Never mark `verified` off the
+  worktree's own gate when the base was stale.

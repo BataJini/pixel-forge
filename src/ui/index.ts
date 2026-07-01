@@ -6,6 +6,7 @@
 export const UI_MODULE = 'pixel-forge/ui' as const;
 
 export { App, default as AppDefault } from './App';
+export * from './color';
 export * from './components';
 export { useReducedMotion, useUiSound } from './hooks';
 export * from './theme';

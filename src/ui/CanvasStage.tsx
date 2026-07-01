@@ -1,13 +1,19 @@
 import { useEffect, useRef, useState } from 'react';
 import {
   createBuffer,
+  fillRectMut,
   fitToScreen,
   getPixel,
   nextZoom,
+  type Palette,
   type PixelBuffer,
+  paletteSwap,
   panBy,
   type RGBA,
   rgbaToHex,
+  setPixelMut,
+  snapBufferToPalette,
+  snapColorToPalette,
   zoomAt,
 } from '../core';
 import { createRenderer, type PixelRenderer } from '../platform';
@@ -50,6 +56,22 @@ const PAINTS: readonly RGBA[] = [
   [95, 158, 90, 255],
   [226, 59, 46, 255],
 ];
+
+/** Seed a small forge-native motif (an anvil with a glowing ember) so the
+ * workbench shows real artwork over the transparency checker on first paint.
+ * The iron (#3A342E) is deliberately off every built-in palette, so entering
+ * indexed / palette-lock mode visibly quantizes it away (U-005). */
+function seedForgeMotif(buf: PixelBuffer): void {
+  const iron: RGBA = [58, 52, 46, 255];
+  const ironDark: RGBA = [36, 32, 28, 255];
+  fillRectMut(buf, { x: 8, y: 23, w: 16, h: 3 }, ironDark); // base
+  fillRectMut(buf, { x: 11, y: 15, w: 10, h: 8 }, iron); // body
+  fillRectMut(buf, { x: 20, y: 16, w: 6, h: 3 }, iron); // horn
+  fillRectMut(buf, { x: 9, y: 21, w: 14, h: 2 }, iron); // waist
+  setPixelMut(buf, 15, 12, [255, 176, 58, 255]); // spark
+  setPixelMut(buf, 16, 11, [255, 224, 138, 255]);
+  setPixelMut(buf, 16, 13, [255, 106, 26, 255]);
+}
 
 interface StagePos {
   x: number;
@@ -248,6 +270,25 @@ function attachKeyboard(session: ToolSession, setSpace: (v: boolean) => void): (
   };
 }
 
+export interface CanvasStageProps {
+  /**
+   * External paint color (U-005 Color panel). When provided it drives the
+   * pencil and the internal demo swatches are hidden; when omitted, the stage is
+   * self-contained with its own demo palette (U-003 standalone preview). In
+   * indexed mode this is already the palette-snapped color (see `effectivePaintColor`).
+   */
+  readonly paintColor?: RGBA;
+  /**
+   * Indexed / palette-lock mode (U-005). When it turns on, the existing artwork is
+   * quantized to `palette`; while on, drawing is restricted to the palette (the
+   * caller passes a snapped `paintColor`) and changing `palette` palette-swaps the
+   * artwork by index on the real canvas.
+   */
+  readonly indexed?: boolean;
+  /** The active palette used for indexed-mode quantize / palette-swap. */
+  readonly palette?: Palette;
+}
+
 /**
  * CanvasStage — the interactive workbench preview for U-004. Wires the full
  * drawing-tool belt (pencil, eraser, bucket, line, rect, ellipse, eyedropper,
@@ -257,8 +298,14 @@ function attachKeyboard(session: ToolSession, setSpace: (v: boolean) => void): (
  * keyboard-operable; the marquee and grid live on the overlay and never touch
  * the pixel buffer (clean-export invariant). The complete workbench chrome —
  * menu bar, dockable panels, command palette — arrives in U-012.
+ *
+ * When a `paintColor` is supplied (by the U-005 Color & Palette panel) it drives
+ * the session's foreground. In indexed / palette-lock mode (`indexed` + `palette`)
+ * the stage quantizes the live buffer to the palette, palette-swaps it by index
+ * when the palette changes, and snaps the pencil color to the palette itself
+ * (belt-and-suspenders), so drawing is genuinely restricted to the palette.
  */
-export function CanvasStage() {
+export function CanvasStage({ paintColor, indexed, palette }: CanvasStageProps = {}) {
   const wellRef = useRef<HTMLDivElement>(null);
   const backdropRef = useRef<HTMLCanvasElement>(null);
   const displayRef = useRef<HTMLCanvasElement>(null);
@@ -266,11 +313,24 @@ export function CanvasStage() {
   const rendererRef = useRef<PixelRenderer | null>(null);
   const sessionRef = useRef<ToolSession | null>(null);
   const spaceRef = useRef(false);
+  // The palette currently baked into the buffer while indexed mode is on; `null`
+  // when free-color, so re-entering indexed mode re-quantizes from scratch.
+  const appliedPaletteRef = useRef<Palette | null>(null);
 
   const [pos, setPos] = useState<StagePos>({ x: 0, y: 0 });
   const [zoomPct, setZoomPct] = useState(100);
   const [snap, setSnap] = useState<Snapshot | null>(null);
 
+  // Belt-and-suspenders palette lock: when indexed mode is on the stage snaps the
+  // fed foreground to the active palette ITSELF, so off-palette pixels are
+  // impossible even if a caller forgets to pre-snap `paintColor` (defense in depth
+  // for the H-1 criterion). Idempotent for `App`, which already passes the snapped
+  // `effectivePaintColor`.
+  const locked = indexed === true && palette !== undefined && palette.colors.length > 0;
+  const effectiveFg =
+    paintColor !== undefined && locked ? snapColorToPalette(palette, paintColor) : paintColor;
+
+  // One-time engine setup: create renderer, seed art, fit, wire interactions.
   useEffect(() => {
     const well = wellRef.current;
     const backdrop = backdropRef.current;
@@ -285,8 +345,14 @@ export function CanvasStage() {
     );
     rendererRef.current = renderer;
     const buffer = createBuffer(ART_W, ART_H);
+    seedForgeMotif(buffer);
     const session = new ToolSession(renderer, buffer, {}, () => setSnap(readSnapshot(session)));
     sessionRef.current = session;
+    // A freshly seeded buffer is not yet quantized to any palette, so clear the
+    // applied-palette marker; the indexed effect (which runs right after this one)
+    // then re-quantizes if the lock is on. Guards the StrictMode remount, where the
+    // session is re-created but refs persist.
+    appliedPaletteRef.current = null;
     renderer.setComposite(buffer);
     setSnap(readSnapshot(session));
 
@@ -321,6 +387,46 @@ export function CanvasStage() {
   }, []);
 
   const session = sessionRef.current;
+
+  // Drive the session's foreground from the Color panel (U-005). In indexed mode
+  // `effectiveFg` is already snapped to the palette, so the pencil is restricted to
+  // palette colors on the REAL canvas. Skipped when uncontrolled (standalone use).
+  const fgKey = effectiveFg ? effectiveFg.join(',') : '';
+  // biome-ignore lint/correctness/useExhaustiveDependencies: effectiveFg is tracked by its value via fgKey.
+  useEffect(() => {
+    if (effectiveFg === undefined) {
+      return;
+    }
+    sessionRef.current?.update({ fg: effectiveFg });
+  }, [fgKey]);
+
+  // Indexed / palette-lock: quantize the live artwork to the palette when the lock
+  // turns on, and palette-swap it by index when the palette changes while locked —
+  // so the killer retro feature runs on the REAL canvas via the ToolSession buffer,
+  // not just a preview. The pencil is separately restricted via `effectiveFg` above.
+  useEffect(() => {
+    const activeSession = sessionRef.current;
+    if (!activeSession || palette === undefined) {
+      return;
+    }
+    if (!indexed) {
+      appliedPaletteRef.current = null;
+      return;
+    }
+    const applied = appliedPaletteRef.current;
+    appliedPaletteRef.current = palette;
+    if (applied === palette || palette.colors.length === 0) {
+      return; // no change, or nothing to snap to (empty palette)
+    }
+    const buffer = activeSession.getBuffer();
+    const next =
+      applied === null || applied.colors.length === 0
+        ? snapBufferToPalette(buffer, palette) // entering lock: quantize existing art
+        : // palette changed while locked: recolor by index, then scrub any pixel
+          // whose index is absent from a shorter/edited target back into the palette.
+          snapBufferToPalette(paletteSwap(buffer, applied, palette), palette);
+    activeSession.setBuffer(next);
+  }, [indexed, palette]);
 
   const applyZoom = (map: (z: number) => number): void => {
     const well = wellRef.current;
