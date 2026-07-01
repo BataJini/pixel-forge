@@ -1,0 +1,21 @@
+# Normalize line endings to LF for all text files. Makes Biome format/lint
+# deterministic across platforms and resolves the Windows CRLF-checkout false
+# failures on `npm run lint` noted in docs/lessons.md (repo blobs are already
+# LF; this pins the working tree so tooling agrees everywhere, incl. CI).
+* text=auto eol=lf
+
+# Binary assets — never touch line endings.
+*.woff2 binary
+*.woff binary
+*.ttf binary
+*.otf binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.avif binary
+
+# Text assets that must stay LF.
+*.svg text eol=lf

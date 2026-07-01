@@ -1,0 +1,160 @@
+/*
+ * Design-system showcase layout (U-002). Workbench-flavored: top bar, a bento of
+ * bevelled panels, and a status readout. Tokens + bevels only — no radius, no
+ * blur, no soft gradients (the checkerboard uses hard-stop gradients, which are
+ * crisp and theme-independent, per the transparency-backdrop spec).
+ */
+.pf-shell {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-5);
+  background: var(--c-anvil);
+}
+
+.pf-topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background: var(--c-iron);
+  box-shadow: var(--bevel-raised), var(--drop-hard);
+}
+
+.pf-brand {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.pf-wordmark {
+  margin: 0;
+  color: var(--c-steel);
+}
+.pf-tagline {
+  margin: 0;
+  color: var(--c-ash);
+}
+
+.pf-topbar__controls {
+  display: inline-flex;
+  gap: var(--space-3);
+}
+
+/* Bento grid of panels. */
+.pf-grid {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+.pf-grid__anvil {
+  grid-row: span 2;
+}
+@media (max-width: 720px) {
+  .pf-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .pf-grid__anvil {
+    grid-row: auto;
+  }
+}
+
+/* Anvil well — recessed groove over the theme-independent checkerboard. */
+.pf-anvil {
+  display: block;
+}
+.pf-anvil__well {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(var(--px) * 96);
+  padding: var(--space-4);
+  background-color: var(--c-checker-a);
+  background-image:
+    linear-gradient(
+      45deg,
+      var(--c-checker-b) 25%,
+      transparent 25%,
+      transparent 75%,
+      var(--c-checker-b) 75%
+    ),
+    linear-gradient(
+      45deg,
+      var(--c-checker-b) 25%,
+      transparent 25%,
+      transparent 75%,
+      var(--c-checker-b) 75%
+    );
+  background-size: calc(var(--px) * 8) calc(var(--px) * 8);
+  background-position:
+    0 0,
+    calc(var(--px) * 4) calc(var(--px) * 4);
+  box-shadow: var(--bevel-inset);
+  image-rendering: pixelated;
+}
+.pf-anvil__art {
+  image-rendering: pixelated;
+}
+
+/* Interactive controls demo. */
+.pf-controls {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+}
+.pf-controls__row,
+.pf-tools,
+.pf-switch {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+.pf-tools {
+  padding: var(--space-3);
+  background: var(--c-anvil);
+  box-shadow: var(--bevel-inset);
+}
+
+.pf-hint {
+  margin: 0;
+  color: var(--c-ash);
+}
+
+/* Live token ramp. */
+.pf-swatches {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(calc(var(--px) * 30), 1fr));
+  gap: var(--space-3);
+  margin: var(--space-4) 0 0;
+  padding: 0;
+  list-style: none;
+}
+.pf-swatches__item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.pf-swatches__chip {
+  height: calc(var(--px) * 16);
+  box-shadow: var(--bevel-inset);
+}
+.pf-swatches__name {
+  color: var(--c-ash);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Status readout. */
+.pf-statusbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-5);
+  padding: var(--space-2) var(--space-4);
+  background: var(--c-slag);
+  color: var(--c-quench);
+  box-shadow: var(--bevel-inset);
+}

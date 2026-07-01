@@ -18,6 +18,7 @@
     "test:e2e": "playwright test",
     "coverage": "vitest run --coverage",
     "typecheck": "tsc -b",
+    "fonts:vendor": "node scripts/vendor-fonts.mjs",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
@@ -29,6 +30,10 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.2",
+    "@fontsource/pixelify-sans": "^5.2.7",
+    "@fontsource/press-start-2p": "^5.2.7",
+    "@fontsource/silkscreen": "^5.2.8",
+    "@fontsource/vt323": "^5.2.7",
     "@playwright/test": "^1.61.1",
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.0",

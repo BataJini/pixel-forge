@@ -1,0 +1,11 @@
+{
+  "unit": "U-002",
+  "title": "Design system & retro UI chrome (Forge)",
+  "ranCommands": true,
+  "buildExit": 0,
+  "testExit": 0,
+  "artifactsPresent": true,
+  "rewardHackFlags": [],
+  "verifiedIn": ".claude/worktrees/wf_023eceaa-423-12 (unit built in isolated worktree; not yet integrated to master)",
+  "evidence": "cd worktree wf_023eceaa-423-12. `npm run build` (tsc -b && vite build) -> exit 0; 53 modules transformed, emitted dist/assets/index-*.js+css and 8 hashed .woff2 fonts. `npm test` (vitest run) -> 7 files, 61 tests passed, exit 0. `npm run test:browser` (vitest browser mode, real Chromium) -> 2 files, 8 tests passed, exit 0 (covers criterion 5 component render + criterion 6 CRT overlay pointer-events:none/aria-hidden/content-pixel-stability). Fonts: 8 self-hosted .woff2 in src/assets/fonts (all magic wOF2=0x774f4632) covering Press Start 2P, Pixelify Sans, Silkscreen, VT323 (criterion 4). contrast.ts is a genuine WCAG 2.2 relativeLuminance/contrastRatio impl (not hardcoded); themes.test.ts asserts exact 13-token hexes for both Arcade+Forge ramps (criterion 1); default theme=arcade with ember #00F0FF (criterion 2); contrast.test.ts computes real ratios >=7:1/4.5:1 for both ramps (criterion 3). tokens.css defines :root/arcade/forge/gameboy/amber blocks and declares no border-radius/blur(). Reward-hack scan of src+test: no .skip/.only/.todo/.fails/xit/xdescribe/@ts-nocheck/eslint-disable; no hardcoded return values in contrast math; assertions intact. NOTE: docs/acceptance/U-002 contains only criteria.md (no held-out .test.ts to run); criteria are covered by in-repo tests which were inspected and confirmed genuine."
+}

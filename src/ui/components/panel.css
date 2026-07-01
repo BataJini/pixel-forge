@@ -1,0 +1,46 @@
+/*
+ * Panel — a workbench surface. Raised = bevel + hard offset drop-shadow;
+ * inset = a recessed groove. Never a border-radius or blurred shadow.
+ */
+.pf-panel {
+  background: var(--c-iron);
+  color: var(--c-steel);
+}
+
+.pf-panel--raised {
+  box-shadow: var(--bevel-raised), var(--drop-hard-lg);
+}
+
+.pf-panel--inset {
+  background: var(--c-slag);
+  box-shadow: var(--bevel-inset);
+}
+
+.pf-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  background-color: var(--c-iron-hi);
+  color: var(--c-steel);
+  box-shadow: inset 0 calc(var(--px) * -1) 0 0 var(--c-slag);
+}
+
+.pf-panel__title {
+  color: var(--c-steel);
+}
+
+.pf-panel__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pf-panel__body {
+  padding: var(--space-4);
+}
+
+.pf-panel--inset > .pf-panel__body {
+  padding: var(--space-3);
+}

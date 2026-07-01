@@ -2,6 +2,42 @@
 
 ADR style. Newest first.
 
+## ADR-009 — U-002 integration: verified design system, deferred Forge ash-on-iron contrast  (2026-07-01)
+- **Context:** U-002 (design system & retro UI chrome) passed Reviewer + QA + the
+  objective gate on the first worktree (`wf_023eceaa-423-12`; no failed sibling —
+  `-13` is U-003). The deliverable lived as uncommitted working-tree changes on the
+  worktree branch (zero commits past the U-001 base). Reviewer/QA surfaced four
+  advisory findings, none blocking: **F-1 (MEDIUM)** `--c-ash` secondary text over
+  `--c-iron` panels fails WCAG AA in the *Forge* theme (3.79:1 in showcase
+  `.pf-tagline`/`.pf-hint`/`.pf-swatches__name`/`.pf-slider__value`) — beyond the
+  stated criterion-3 pairs (all pass) but a real AA gap the constitution forbids;
+  **F-2 (LOW)** CRT overlay sits below native `<dialog>` top-layer; **F-3 (LOW)**
+  persistent `will-change: transform` on idle sweep/marquee; **F-4 (LOW)** coverage
+  `include` still scoped to `src/core/**` (carry-over of U-001 F-2).
+- **Decision:** Mark U-002 **verified** on the deliverable's real state. Committed the
+  deliverable on the worktree branch, `git merge --squash` into `master` (no
+  conflicts), `npm install` to sync 4 new devDeps, then post-merge in `master`:
+  `typecheck`/`test`/`build` all exit 0, `dist/index.html` + 8 hashed `.woff2`
+  present, Biome (scoped to the deliverable) exit 0. Do **not** hold the unit on
+  F-1..F-4. Fold **F-1 into U-012** (before the real workbench ships ash-on-iron
+  secondary text — use `--c-steel` on iron, or place secondary text on anvil, or
+  nudge Forge `--c-ash`/`--c-iron` to ash/iron ≥ 4.5, and add an ash-on-iron
+  assertion so it can't regress). F-2/F-3 are optional polish for U-013; F-4 is the
+  same coverage-widening already tracked from U-001.
+- **Rationale:** The objective gate is about the deliverable's real build/test/artifact
+  state, which is green, and every enumerated U-002 acceptance criterion (1–6 held-out
+  + all manual) passes independently. F-1 is a live but localized WCAG gap confined to
+  showcase text that U-012 replaces wholesale with the real workbench; fixing it there
+  (with a regression assertion) is cheaper and lands where the offending text actually
+  lives, rather than patching a throwaway showcase now.
+- **Consequences:** The Forge theme has a known ash-on-iron AA gap in the *showcase
+  only* until U-012; flagged in work-breakdown + lessons so it isn't forgotten. The
+  focus-ring hex is driven by the theme `--c-spark` token (Arcade `#FF2E88`, Forge
+  `#FFB03A`) rather than the single hardcoded `#FFB03A` named in `criteria.md` — the
+  token-driven behavior is more spec-aligned and is the intended contract going
+  forward; no spec change needed. Master-spec/design-direction unchanged — reality
+  matched the spec.
+
 ## ADR-008 — U-001 integration: verified scaffold, deferred CI-branch reconcile  (2026-07-01)
 - **Context:** U-001 (scaffold + tooling + CI/deploy) passed Reviewer + QA + the
   objective gate on fix-worktree `wf_023eceaa-423-6` (the `-2` worktree failed on

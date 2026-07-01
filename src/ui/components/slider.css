@@ -1,0 +1,71 @@
+/*
+ * Slider — recessed inset groove (track) with a raised Ember thumb. Hard-edged
+ * across WebKit + Firefox; no radius, no blur. Focus ring on the thumb.
+ */
+.pf-slider {
+  display: grid;
+  gap: var(--space-2);
+  color: var(--c-steel);
+}
+
+.pf-slider__meta {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.pf-slider__label {
+  color: var(--c-steel);
+}
+
+.pf-slider__value {
+  color: var(--c-ash);
+}
+
+.pf-slider__input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: calc(var(--px) * 8);
+  margin: 0;
+  padding: 0;
+  background: var(--c-slag);
+  box-shadow: var(--bevel-inset);
+  cursor: pointer;
+}
+
+/* Track (Firefox) */
+.pf-slider__input::-moz-range-track {
+  height: calc(var(--px) * 8);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+/* Thumb (WebKit) */
+.pf-slider__input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: calc(var(--px) * 6);
+  height: calc(var(--px) * 8);
+  background: var(--c-ember);
+  border: 0;
+  border-radius: 0;
+  box-shadow: var(--bevel-raised);
+}
+
+/* Thumb (Firefox) */
+.pf-slider__input::-moz-range-thumb {
+  width: calc(var(--px) * 6);
+  height: calc(var(--px) * 8);
+  background: var(--c-ember);
+  border: 0;
+  border-radius: 0;
+  box-shadow: var(--bevel-raised);
+}
+
+.pf-slider__input:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring), var(--bevel-inset);
+}

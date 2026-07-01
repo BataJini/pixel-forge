@@ -6,7 +6,7 @@ The engine builds a unit only when all its deps are `verified`.
 | id | title | deps | spec ref | status |
 |----|-------|------|----------|--------|
 | U-001 | Project scaffold + tooling + CI/deploy | — | §1 | verified |
-| U-002 | Design system & retro UI chrome (Forge) | U-001 | design-direction, §3 | pending |
+| U-002 | Design system & retro UI chrome (Forge) | U-001 | design-direction, §3 | verified |
 | U-003 | Canvas engine + pixel buffer + render pipeline | U-001 | §3.1, §4.1, §5 | pending |
 | U-004 | Drawing tools | U-003 | §3.2, §5 | pending |
 | U-005 | Color & palette system | U-002, U-003 | §3.3, §4.4, §5 | pending |
@@ -65,6 +65,23 @@ The engine builds a unit only when all its deps are `verified`.
   contrast passes AA measured with CRT on at Subtle (asserted). Held-out:
   `docs/acceptance/U-002`.
 - Deps: U-001
+- **Status: verified** (2026-07-01, integrated to `master`, 1 iteration — passed
+  Reviewer + QA + objective gate first try on `wf_023eceaa-423-12`). Post-merge in
+  `master`: `typecheck`/`test` (7 files / 61 tests)/`build` all exit 0,
+  `dist/index.html` + 8 hashed `.woff2` present, Biome (scoped) exit 0. Every held-out
+  criterion (1–6) + all manual criteria pass (see `docs/reviews/U-002.md`,
+  `docs/qa/U-002.md`, `docs/gate/U-002.json`). See decision-log ADR-009.
+- Follow-ups carried forward (advisory, non-blocking):
+  - **F-1 (MEDIUM) → fold into U-012:** Forge `--c-ash` secondary text on `--c-iron`
+    panels fails WCAG AA (3.79:1) in the showcase. Fix in the real workbench: use
+    `--c-steel` on iron / place secondary text on anvil / nudge Forge `--c-ash`/
+    `--c-iron` to ash/iron ≥ 4.5, and add an ash-on-iron assertion to prevent regress.
+  - **F-2 (LOW) → U-013:** CRT overlay renders below native `<dialog>` top-layer, so
+    open modals aren't scanlined (cosmetic).
+  - **F-3 (LOW) → U-013:** persistent `will-change: transform` on idle CRT sweep +
+    marquee keeps a compositor layer alive; scope to active state.
+  - **F-4 (LOW) → U-005/U-012:** coverage `include` still `src/core/**`; widen to count
+    `ui/theme`, `platform/audio` (same carry-over as U-001 F-2).
 
 ### U-003 — Canvas engine + pixel buffer + render pipeline
 - Spec ref: §3.1, §4.1, §5

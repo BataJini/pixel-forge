@@ -1,0 +1,132 @@
+/*
+ * Bevelled button. Raised → pressed (swap bevel + translate --px). Hard edges
+ * only: no border-radius, no blurred shadow, stepped transitions.
+ */
+.pf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-3);
+  border: 0;
+  border-radius: 0;
+  margin: 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--c-iron);
+  color: var(--c-steel);
+  font-family: var(--font-ui);
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  cursor: pointer;
+  user-select: none;
+  box-shadow: var(--bevel-raised);
+  transform: translate(0, 0);
+  transition:
+    transform var(--dur-press) var(--step-fast),
+    background-color var(--dur-press) var(--step-fast),
+    color var(--dur-press) var(--step-fast),
+    box-shadow var(--dur-press) var(--step-fast);
+}
+
+.pf-btn__label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Sizes — integer heights on the --px grid. */
+.pf-btn--sm {
+  font-size: 12px;
+  padding: var(--space-2) var(--space-3);
+}
+.pf-btn--md {
+  font-size: 16px;
+}
+.pf-btn--lg {
+  font-size: 20px;
+  padding: var(--space-4) var(--space-5);
+}
+
+.pf-btn:hover {
+  background: var(--c-iron-hi);
+}
+
+.pf-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring), var(--bevel-raised);
+}
+
+/* Physical press — recess + shift down-right by one pixel unit. */
+.pf-btn:active {
+  transform: translate(var(--px), var(--px));
+  box-shadow: var(--bevel-pressed);
+}
+
+.pf-btn:disabled {
+  background: var(--c-iron);
+  color: var(--c-ash);
+  cursor: not-allowed;
+  box-shadow: var(--bevel-inset);
+  transform: none;
+}
+
+/* Primary — the Ember CTA face; dark anvil text (AA-verified across themes). */
+.pf-btn--primary {
+  background: var(--c-ember);
+  color: var(--c-anvil);
+}
+.pf-btn--primary:hover {
+  background: var(--c-flame);
+}
+
+/*
+ * Danger — destructive. AA-safe: text stays steel-on-iron (red-on-mid-red never
+ * reaches 4.5:1), while the destructive signal is a hard Warning bevel edge plus
+ * a Warning top rule — state read by shape + accent, never hue-on-text alone.
+ */
+.pf-btn--danger {
+  color: var(--c-steel);
+  box-shadow:
+    inset 0 var(--px) 0 0 var(--c-warning),
+    var(--bevel-raised);
+}
+.pf-btn--danger:hover {
+  background: var(--c-iron-hi);
+}
+.pf-btn--danger:focus-visible {
+  box-shadow:
+    var(--focus-ring),
+    inset 0 var(--px) 0 0 var(--c-warning),
+    var(--bevel-raised);
+}
+.pf-btn--danger:active {
+  box-shadow:
+    inset 0 var(--px) 0 0 var(--c-warning),
+    var(--bevel-pressed);
+}
+
+/* Ghost — flat until interacted; reveals bevel on hover/focus. */
+.pf-btn--ghost {
+  background: transparent;
+  box-shadow: none;
+}
+.pf-btn--ghost:hover {
+  background: var(--c-iron);
+  box-shadow: var(--bevel-raised);
+}
+.pf-btn--ghost:focus-visible {
+  box-shadow: var(--focus-ring), var(--bevel-raised);
+}
+.pf-btn--ghost:active {
+  box-shadow: var(--bevel-pressed);
+}
+
+/* Active tool — the control is "hot/engaged": Ember face, dark text, recessed. */
+.pf-btn[data-active="true"] {
+  background: var(--c-ember);
+  color: var(--c-anvil);
+  box-shadow: var(--bevel-pressed);
+}
+.pf-btn[data-active="true"]:hover {
+  background: var(--c-flame);
+}

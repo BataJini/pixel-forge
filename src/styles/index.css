@@ -1,0 +1,11 @@
+/*
+ * PixelForge global stylesheet entry.
+ * Import order matters: @font-face first, then the token layer (which the rest
+ * depend on), then type scale, ambient motion, and the CRT display layer.
+ * Component-scoped CSS is imported by each component so it cascades AFTER these.
+ */
+@import "./fonts.css";
+@import "./tokens.css";
+@import "./typography.css";
+@import "./motion.css";
+@import "./crt.css";

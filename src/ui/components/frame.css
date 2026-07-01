@@ -1,0 +1,49 @@
+/*
+ * Frame — carved pixel frame with crisp notched corners (axis-aligned clip-path)
+ * and a hard, theme-tokened pixel outline. The offset "drop" uses a 0-blur
+ * drop-shadow filter so it follows the notched silhouette and stays hard-edged.
+ */
+.pf-frame {
+  --frame-notch: calc(var(--px) * 3);
+  --frame-border: calc(var(--px) * 3);
+  position: relative;
+  padding: var(--frame-border);
+  background: var(--c-slag); /* becomes the outer 1-unit pixel outline */
+  clip-path: polygon(
+    var(--frame-notch) 0,
+    calc(100% - var(--frame-notch)) 0,
+    calc(100% - var(--frame-notch)) var(--frame-notch),
+    100% var(--frame-notch),
+    100% calc(100% - var(--frame-notch)),
+    calc(100% - var(--frame-notch)) calc(100% - var(--frame-notch)),
+    calc(100% - var(--frame-notch)) 100%,
+    var(--frame-notch) 100%,
+    var(--frame-notch) calc(100% - var(--frame-notch)),
+    0 calc(100% - var(--frame-notch)),
+    0 var(--frame-notch),
+    var(--frame-notch) var(--frame-notch)
+  );
+  filter: drop-shadow(var(--px) var(--px) 0 var(--c-slag));
+}
+
+.pf-frame__inner {
+  padding: var(--space-4);
+  background: var(--c-iron);
+  color: var(--c-steel);
+  /* Inner carve: light top-left, dark bottom-right — one light source. */
+  box-shadow: var(--bevel-raised);
+  clip-path: polygon(
+    var(--frame-notch) 0,
+    calc(100% - var(--frame-notch)) 0,
+    calc(100% - var(--frame-notch)) var(--frame-notch),
+    100% var(--frame-notch),
+    100% calc(100% - var(--frame-notch)),
+    calc(100% - var(--frame-notch)) calc(100% - var(--frame-notch)),
+    calc(100% - var(--frame-notch)) 100%,
+    var(--frame-notch) 100%,
+    var(--frame-notch) calc(100% - var(--frame-notch)),
+    0 calc(100% - var(--frame-notch)),
+    0 var(--frame-notch),
+    var(--frame-notch) var(--frame-notch)
+  );
+}

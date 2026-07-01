@@ -1,0 +1,78 @@
+/*
+ * Stepped motion utilities (design-direction.md · motion language).
+ * ---------------------------------------------------------------------------
+ * Retro motion SNAPS: every animation uses steps()/integer position changes —
+ * never eased cubic-bezier. Only compositor-friendly props (transform, opacity,
+ * clip-path) are animated. All of these are ambient and are frozen by the
+ * global `prefers-reduced-motion` reset in tokens.css.
+ */
+
+/* Hard on/off cursor / caret blink — steps(1) so it never fades. */
+@keyframes pf-blink {
+  0%,
+  50% {
+    opacity: 1;
+  }
+  50.01%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/* A single spark blink emitted when a tool is selected (opacity punch). */
+@keyframes pf-spark {
+  0% {
+    opacity: 0;
+    transform: scale(1);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1);
+  }
+}
+
+/* Selection marching-ants — stepped dash offset (no smooth crawl). */
+@keyframes pf-march {
+  to {
+    background-position: calc(var(--px) * 4) 0;
+  }
+}
+
+/* Marquee crawl for the top bar — integer translate, stepped. */
+@keyframes pf-crawl {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.pf-blink {
+  animation: pf-blink var(--dur-blink) var(--step-blink) infinite;
+}
+
+.pf-marquee {
+  display: inline-block;
+  white-space: nowrap;
+  will-change: transform;
+  animation: pf-crawl var(--dur-crawl) linear infinite;
+}
+
+/*
+ * Marching-ants selection outline: a stepped dashed border drawn from a tiling
+ * gradient, offset in whole --px steps. Applied to selection rectangles later.
+ */
+.pf-marching-ants {
+  background-image: repeating-linear-gradient(
+    90deg,
+    var(--c-steel) 0 var(--px),
+    transparent var(--px) calc(var(--px) * 2)
+  );
+  background-size: calc(var(--px) * 4) 100%;
+  background-repeat: repeat-x;
+  animation: pf-march calc(var(--dur-blink) / 2) var(--step-med) infinite;
+}

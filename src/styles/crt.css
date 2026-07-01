@@ -1,0 +1,151 @@
+/*
+ * CRT display layer (design-direction.md · CRT atmospherics).
+ * ---------------------------------------------------------------------------
+ * A PURE, NON-INTERACTIVE overlay composited ABOVE all content. It is a real
+ * element (<CrtOverlay/>), fixed to the viewport, `pointer-events: none`, and
+ * `aria-hidden` — so it never intercepts input, never enters the accessibility
+ * tree, and never changes content DOM geometry (constitution + U-002 criterion 6
+ * + clean-export invariant: this layer touches NO pixel buffer and appears in NO
+ * export).
+ *
+ * Levels (data-level on the element):
+ *   off    → all sub-layers hidden (element stays mounted; a pure escape hatch)
+ *   subtle → static scanlines + gentle phosphor glow, NO flicker  (DEFAULT)
+ *   full   → stronger scanlines + glow + vignette + subtle flicker + sweep
+ *
+ * Alphas are deliberately low so the effective contrast of the base tokens stays
+ * within their AA margin (steel/anvil ≥ 7:1, ash/anvil ≥ 4.5:1) with the layer
+ * ON at Subtle. Under prefers-reduced-motion the global reset (tokens.css)
+ * freezes flicker + sweep to a static frame; static scanlines/glow remain.
+ */
+
+.pf-crt {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+  pointer-events: none;
+  overflow: hidden;
+  /* Isolate blending so the glow screens against a stable backdrop. */
+  isolation: isolate;
+}
+
+.pf-crt__layer {
+  position: absolute;
+  inset: 0;
+}
+
+/* Scanlines — thin dark rows every 3 logical px. Theme-independent dark. */
+.pf-crt__scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.11) 0,
+    rgba(0, 0, 0, 0.11) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  opacity: 1;
+}
+
+/* Gentle phosphor haze — additive screen light, very low alpha (atmospherics). */
+.pf-crt__glow {
+  background: radial-gradient(
+    140% 120% at 50% 42%,
+    rgba(255, 255, 255, 0.05) 0%,
+    rgba(255, 255, 255, 0) 55%
+  );
+  mix-blend-mode: screen;
+  opacity: 0.6;
+}
+
+/* Curvature vignette — darkened corners (Full only). */
+.pf-crt__vignette {
+  background: radial-gradient(130% 130% at 50% 50%, transparent 58%, rgba(0, 0, 0, 0.32) 100%);
+  opacity: 0;
+}
+
+/* Moving bright sweep band (Full only, motion — frozen under reduced-motion). */
+.pf-crt__sweep {
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(255, 255, 255, 0.04) 48%,
+    rgba(255, 255, 255, 0.06) 50%,
+    rgba(255, 255, 255, 0.04) 52%,
+    transparent 100%
+  );
+  mix-blend-mode: screen;
+  height: 40%;
+  inset: -40% 0 auto 0;
+  opacity: 0;
+  will-change: transform;
+}
+
+/* ── Levels ──────────────────────────────────────────────────────────────── */
+
+.pf-crt[data-level="off"] .pf-crt__layer {
+  display: none;
+}
+
+/* Subtle (default): scanlines + gentle glow; no vignette, no motion. */
+.pf-crt[data-level="subtle"] .pf-crt__scanlines {
+  opacity: 0.9;
+}
+.pf-crt[data-level="subtle"] .pf-crt__glow {
+  opacity: 0.5;
+}
+.pf-crt[data-level="subtle"] .pf-crt__vignette,
+.pf-crt[data-level="subtle"] .pf-crt__sweep {
+  display: none;
+}
+
+/* Full: stronger scanlines, glow, vignette, flicker + sweep. */
+.pf-crt[data-level="full"] .pf-crt__scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.2) 0,
+    rgba(0, 0, 0, 0.2) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  animation: pf-crt-flicker 4000ms var(--step-med) infinite;
+}
+.pf-crt[data-level="full"] .pf-crt__glow {
+  opacity: 0.85;
+}
+.pf-crt[data-level="full"] .pf-crt__vignette {
+  opacity: 1;
+}
+.pf-crt[data-level="full"] .pf-crt__sweep {
+  opacity: 1;
+  animation: pf-crt-sweep 6000ms linear infinite;
+}
+
+/*
+ * Flicker — intentionally tiny and slow so it is NOT a full-screen flash
+ * (constitution: no flash > 3/sec). Opacity stays near 1 with brief small dips.
+ */
+@keyframes pf-crt-flicker {
+  0%,
+  70%,
+  100% {
+    opacity: 1;
+  }
+  74% {
+    opacity: 0.94;
+  }
+  78% {
+    opacity: 1;
+  }
+  86% {
+    opacity: 0.96;
+  }
+}
+
+@keyframes pf-crt-sweep {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(250vh);
+  }
+}

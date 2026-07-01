@@ -1,0 +1,85 @@
+/*
+ * Dialog — native <dialog>, hard-bevelled frame, dither backdrop. No radius,
+ * no blur. The ::backdrop is a stepped dither veil over a dark wash.
+ */
+.pf-dialog {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  max-width: min(92vw, calc(var(--px) * 240));
+  background: transparent;
+  color: var(--c-steel);
+  overflow: visible;
+}
+
+.pf-dialog::backdrop {
+  background-color: rgba(2, 3, 8, 0.72);
+  background-image: var(--tex-dither);
+  background-size: calc(var(--px) * 4) calc(var(--px) * 4);
+  image-rendering: pixelated;
+}
+
+.pf-dialog__frame {
+  background: var(--c-iron);
+  box-shadow: var(--bevel-raised-lg), var(--drop-hard-lg);
+}
+
+.pf-dialog__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-4);
+  background-color: var(--c-iron-hi);
+  box-shadow: inset 0 calc(var(--px) * -1) 0 0 var(--c-slag);
+}
+
+.pf-dialog__title {
+  margin: 0;
+  color: var(--c-flame);
+}
+
+.pf-dialog__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--px) * 12);
+  height: calc(var(--px) * 12);
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: var(--c-iron);
+  color: var(--c-steel);
+  font-family: var(--font-ui);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: var(--bevel-raised);
+}
+.pf-dialog__close:hover {
+  background: var(--c-warning);
+  color: var(--c-steel);
+}
+.pf-dialog__close:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring), var(--bevel-raised);
+}
+.pf-dialog__close:active {
+  transform: translate(var(--px), var(--px));
+  box-shadow: var(--bevel-pressed);
+}
+
+.pf-dialog__body {
+  padding: var(--space-5);
+  font-family: var(--font-ui);
+  line-height: 1.4;
+}
+
+.pf-dialog__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  padding: var(--space-4);
+  box-shadow: inset 0 var(--px) 0 0 var(--c-slag);
+}

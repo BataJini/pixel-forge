@@ -3,7 +3,7 @@
   "phase": "building",
   "units": [
     { "id": "U-001", "title": "Project scaffold + tooling + CI/deploy", "deps": [], "status": "verified", "iterations": 2 },
-    { "id": "U-002", "title": "Design system & retro UI chrome (Forge)", "deps": ["U-001"], "status": "pending", "iterations": 0 },
+    { "id": "U-002", "title": "Design system & retro UI chrome (Forge)", "deps": ["U-001"], "status": "verified", "iterations": 1 },
     { "id": "U-003", "title": "Canvas engine + pixel buffer + render pipeline", "deps": ["U-001"], "status": "pending", "iterations": 0 },
     { "id": "U-004", "title": "Drawing tools", "deps": ["U-003"], "status": "pending", "iterations": 0 },
     { "id": "U-005", "title": "Color & palette system", "deps": ["U-002", "U-003"], "status": "pending", "iterations": 0 },
