@@ -10,4 +10,12 @@ export * from './color';
 export * from './components';
 export { ExportDialog, type ExportDialogProps } from './export';
 export { useReducedMotion, useUiSound } from './hooks';
+export {
+  LayerCanvas,
+  type LayerCanvasProps,
+  LayersPanel,
+  LayersProvider,
+  type LayersProviderProps,
+  useLayerStore,
+} from './layers';
 export * from './theme';

@@ -3,6 +3,7 @@ import { CanvasStage } from './CanvasStage';
 import { ColorPalettePanel } from './color/ColorPalettePanel';
 import { ColorProvider, useColorStore } from './color/ColorProvider';
 import { CrtOverlay } from './components/CrtOverlay';
+import { LayersPanel } from './layers';
 import { ThemeProvider } from './theme/ThemeProvider';
 import { useTheme } from './theme/useTheme';
 import './App.css';
@@ -15,9 +16,12 @@ import './App.css';
  * self-contained in tests. It drives `data-theme`/`data-crt` and the
  * always-mounted, non-interactive `CrtOverlay` display layer (U-002). Below the
  * brand top bar, the workbench hosts the runnable canvas preview (`CanvasStage`,
- * U-003) alongside the Color & Palette panel (`ColorPalettePanel`, U-005) — the
- * panel's foreground color drives the canvas pencil, so picking/loading colors is
- * demonstrably wired to the artwork. In indexed / palette-lock mode the pencil is
+ * U-003) alongside a right dock of workbench panels: the Color & Palette panel
+ * (`ColorPalettePanel`, U-005) — whose foreground color drives the canvas pencil,
+ * so picking/loading colors is demonstrably wired to the artwork — and the Layers
+ * panel (`LayersPanel`, U-007) with its own undoable layer stack (add/duplicate/
+ * delete/rename/reorder/lock/opacity/merge/flatten over a live composite preview).
+ * In indexed / palette-lock mode the pencil is
  * fed `effectivePaintColor` (the fg snapped to the active palette) and the stage
  * quantizes / palette-swaps its buffer, so drawing is genuinely restricted to the
  * palette. The full workbench layout — menu bar, tool rack, dockable panels, the
@@ -40,7 +44,10 @@ function AppBody() {
           indexed={state.indexed}
           palette={state.palette}
         />
-        <ColorPalettePanel standalone={false} />
+        <div className="pf-dock">
+          <ColorPalettePanel standalone={false} />
+          <LayersPanel />
+        </div>
       </main>
       <CrtOverlay level={renderedCrtLevel} />
     </div>

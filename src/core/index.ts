@@ -15,6 +15,7 @@ export * from './buffer';
 export * from './color';
 export * from './exporters';
 export * from './history';
+export * from './layers';
 export * from './palette';
 export * from './path';
 export * from './rect';
