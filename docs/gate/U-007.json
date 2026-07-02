@@ -1,0 +1,9 @@
+{
+  "unit": "U-007",
+  "ranCommands": true,
+  "buildExit": 0,
+  "testExit": 0,
+  "artifactsPresent": true,
+  "rewardHackFlags": [],
+  "evidence": "CANONICAL BUILD = worktree wf_4f675b3c-bea-6 (the Reviewer+QA-blessed fix build carrying the WCAG 2.1.1 keyboard fix in src/ui/CanvasStage.tsx + LayersKeyboard regression tests, on top of the -bea-2 layer engine/panel). This supersedes the earlier gate reading that named -bea-2 (13:06, pre-keyboard-fix) and the round-1 artifacts that referenced the abandoned -6be-2 layersController architecture. Post-integration re-verification on merged master (commit after `feat: integrate U-007 layers panel & management`, 2026-07-02): (1) held-out suite docs/acceptance/U-007/layers.acceptance.test.ts byte-identical to pre-merge master (untampered); (2) `npm run build` (tsc -b && vite build) => exit 0, 101 modules, dist/index.html + assets emitted (JS 295.88 kB / 93.50 kB gz < budget); (3) `npx vitest run` => 33 files / 473 tests passed, exit 0; (4) `npx vitest run docs/acceptance/U-007/` => 5/5 pass, exit 0 (hide/show restores composite, reorder changes winner, merge-down==composite([A,B]), flatten==full composite, opacity 0/100 scaling). REWARD-HACK SCAN: docs/acceptance/U-007/ unchanged vs pre-merge master; vite.config.ts adds only the 'docs/acceptance/U-007/**/*.test.{ts,tsx}' include (legitimate held-out activation); no .skip/.only/xit/xdescribe/.todo/@ts-ignore/@ts-nocheck/process.exit in new or changed test files; assertions intact => rewardHackFlags empty. OBJECTIVE GATE: PASS on the integrated build (buildExit=0, testExit=0, artifactsPresent=true, no reward-hack flags). QA (docs/qa/U-007.md, -bea-6) = PASS and Review (docs/reviews/U-007.md, -bea-6) = PASS; the prior QA keyboard FAIL was against the superseded -bea-2 and is resolved in this build. Reconciles M-3 from the review handoff."
+}

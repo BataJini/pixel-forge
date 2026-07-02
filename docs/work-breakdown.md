@@ -11,7 +11,7 @@ The engine builds a unit only when all its deps are `verified`.
 | U-004 | Drawing tools | U-003 | §3.2, §5 | verified |
 | U-005 | Color & palette system | U-002, U-003 | §3.3, §4.4, §5 | verified |
 | U-006 | History / undo-redo | U-003, U-004 | §3.6, §5 | verified |
-| U-007 | Layers panel & management | U-003, U-006 | §3.4, §4.1 | pending |
+| U-007 | Layers panel & management | U-003, U-006 | §3.4, §4.1 | verified |
 | U-008 | Animation frames + timeline + onion skin | U-003, U-006, U-007 | §3.5 | pending |
 | U-009 | Export: PNG (scaled) + SVG | U-003 | §3.8, §5 | verified |
 | U-010 | Export: GIF + spritesheet (+JSON atlas) | U-008, U-009 | §3.8, §5 | pending |
@@ -235,6 +235,16 @@ The engine builds a unit only when all its deps are `verified`.
   flatten produce correct composite; cannot delete last layer; reorder persists;
   each op undoable. Held-out: `docs/acceptance/U-007`.
 - Deps: U-003, U-006
+- **Status: verified (2026-07-02, 3 iterations).** Integrated build `-bea-6`
+  (pure `src/core/layers.ts` algebra + undoable `src/state/layerStore.ts` +
+  bespoke `src/ui/layers/` panel). Post-merge master: build 0, vitest 473/33
+  (held-out U-007 5/5), no reward-hack. See ADR-015.
+- **Carried to U-012** (not U-007 defects — in-scope-deferred per ADR-010 pattern):
+  the panel mounts its own demo `LayerStack`/history, so (a) strokes from the main
+  `CanvasStage` don't yet land on the active layer, and (b) layer undo is via the
+  panel's own Revert/Reapply, not the global Ctrl+Z — U-012 unifies the tool
+  session, layer stack, and a single history timeline. **Carried to U-012/U-013:**
+  bespoke grip/nudge glyphs (L-1); trim/fallback for blank layer names (L-2).
 
 ### U-008 — Animation frames + timeline + onion skin
 - Spec ref: §3.5

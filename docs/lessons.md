@@ -135,3 +135,24 @@ unit is verified, especially after a fix that took several iterations.
   be the ~75% that happened to succeed. (d) Still re-run the full gate on merged `master`
   regardless (build 0 / 419 tests / reward-hack clean here) — integration is only proven
   on the merged tree, per the standing rule above.
+- **When a fix loop spawns multiple sibling worktrees under one workflow id, the
+  objective-gate JSON can name an *earlier* sibling than the one Review AND QA
+  actually blessed — reconcile all three before merging (U-007).** U-007's lineage
+  was `-6be-2` (Review FAIL) → `-bea-2` (gate PASS but QA/Review FAIL on a WCAG
+  2.1.1 keyboard blocker) → `-bea-6` (the keyboard fix). `docs/gate/U-007.json`
+  recorded PASS against `-bea-2`, yet both `docs/reviews/U-007.md` and
+  `docs/qa/U-007.md` had moved on and passed only `-bea-6` (a small `CanvasStage.tsx`
+  guard + regression tests on top of `-bea-2`). Worse, the round-1 QA artifacts
+  under `docs/qa/U-007-artifacts/` referenced a *third*, superseded architecture
+  (`-6be-2`'s `layersController`, which failed 2/5 held-out) — stale evidence that
+  would mislead a naive reader. Process rules for the Doc/integrator: (a) the build
+  to integrate is the one the **Review verdict + QA both name in their handoff**,
+  not whatever the gate JSON references — when they disagree, the newest build that
+  Review *and* QA blessed wins, and you must re-run the objective gate on it (I did:
+  `-bea-6` post-merge on master = build 0, 473/33, held-out 5/5). (b) A builder's
+  worktree branch may sit at the same commit as `master` with all deliverables
+  **uncommitted** in the working tree — commit them on the worktree branch first,
+  then `merge --no-ff`, so the integration is a real reviewable merge and not a
+  pile of loose files. (c) Treat older `-artifacts/` logs as stale unless their
+  named worktree matches the integrated build; cite only the round that validated
+  the merged build so the docs don't drift.

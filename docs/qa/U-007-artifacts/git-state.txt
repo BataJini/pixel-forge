@@ -1,0 +1,22 @@
+# git state (observed Wed Jul  1 23:23:32 GST 2026)
+## HEAD
+9e9ea80 feat: integrate U-006 history / undo-redo
+cb66d7d feat: integrate U-009 export (PNG scaled + SVG)
+4ef7d1e feat: U-009 PNG (scaled) + SVG export (worktree)
+
+## U-007 status in state.json
+11:    { "id": "U-007", "title": "Layers panel & management", "deps": ["U-003", "U-006"], "status": "pending", "iterations": 0 },
+12:    { "id": "U-008", "title": "Animation frames + timeline + onion skin", "deps": ["U-003", "U-006", "U-007"], "status": "pending", "iterations": 0 },
+15:    { "id": "U-011", "title": "Project persistence + dialogs + image import", "deps": ["U-003", "U-005", "U-007"], "status": "pending", "iterations": 0 },
+16:    { "id": "U-012", "title": "App shell: layout, menus, shortcuts, command palette, help", "deps": ["U-002", "U-004", "U-005", "U-006", "U-007", "U-011"], "status": "pending", "iterations": 0 },
+
+## vite.config test.include (activated held-out suites)
+28:    // Held-out acceptance tests live in docs/acceptance/<unit>/ and import the pure
+38:      'docs/acceptance/U-003/**/*.test.{ts,tsx}',
+39:      'docs/acceptance/U-004/**/*.test.{ts,tsx}',
+40:      'docs/acceptance/U-005/**/*.test.{ts,tsx}',
+41:      'docs/acceptance/U-006/**/*.test.{ts,tsx}',
+42:      'docs/acceptance/U-009/**/*.test.{ts,tsx}',
+
+## tracked files matching U-007 or layer
+docs/acceptance/U-007/criteria.md

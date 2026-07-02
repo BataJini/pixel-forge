@@ -1,0 +1,36 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "PixelForge" [level=1] [ref=e5]
+    - paragraph [ref=e7]: Hammer pixels into sprites.
+  - main "Workbench" [ref=e8]:
+    - region "Drawing tools preview" [ref=e9]:
+      - paragraph [ref=e10]: "Interactive 32 by 32 pixel canvas. Choose a tool from the tool rack, pick a paint color, and drag on the canvas to draw. Keyboard: B pencil, E eraser, G fill, L line, U rectangle/ellipse, I eyedropper, M select, V move, H pan; X swaps colors; square brackets change brush size; Control-A selects all, Escape deselects; Control-C copies, Control-X cuts, and Control-V pastes the selection as a floating selection; arrow keys nudge the Move tool or the floating selection, and Enter stamps it down; hold Space to pan. Control-Z undoes and Control-Shift-Z or Control-Y redoes the last edit; a whole drag is one undo step."
+      - toolbar "Drawing tools" [ref=e11]:
+        - generic [ref=e12]
+      - toolbar "Edit history" [ref=e23]:
+        - generic [ref=e24]
+      - toolbar "Colors and modifiers" [ref=e28]:
+        - generic [ref=e29]
+        - generic [ref=e40]
+      - toolbar "Selection clipboard" [ref=e49]:
+        - generic [ref=e50]
+      - toolbar "View controls" [ref=e54]:
+        - generic [ref=e55]
+        - button "Clear" [ref=e60] [cursor=pointer]
+        - button "Export…" [ref=e61] [cursor=pointer]
+      - generic [ref=e62]:
+        - status
+      - paragraph [ref=e66]:
+        - generic [ref=e67]
+        - generic [ref=e69]: "Color #3A342EFF"
+        - generic [ref=e70]
+        - generic [ref=e72]
+        - generic [ref=e74]: Tool pencil
+        - generic [ref=e75]: Sel —
+    - generic [ref=e76]:
+      - generic [ref=e77]:
+        - generic [ref=e79]: Color / Palette
+        - generic [ref=e80]
+      - generic [ref=e165]:
+        - generic [ref=e166]
+        - generic [ref=e171]

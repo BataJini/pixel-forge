@@ -2,6 +2,35 @@
 
 ADR style. Newest first.
 
+## ADR-015 — U-007 layers: pure layer algebra + undoable store + bespoke panel; integrate `-bea-6`  (2026-07-02)
+- **Context:** U-007 needs a layer stack (add/dup/delete/rename/reorder/lock/
+  opacity/merge-down/flatten) whose composite is deterministic and testable against
+  the held-out suite, plus a keyboard-operable, on-brand panel. The fix loop
+  produced three worktrees (`-6be-2` → `-bea-2` → `-bea-6`); Review + QA both ran on
+  and blessed `-bea-6`, but the recorded objective-gate JSON still named the
+  superseded `-bea-2` (M-3).
+- **Decision:** Split the unit three ways per the constitution's module boundaries:
+  (1) `src/core/layers.ts` — pure, immutable, DOM/id-free layer algebra
+  (`composite`/`moveLayer`/`mergeDown`/`flatten`, buffers deep-copied where pixels
+  bake, shared by reference only for metadata); (2) `src/state/layerStore.ts` — an
+  undoable `LayerStack` with copy-on-write `beginStroke` and lock enforcement on
+  delete/merge/flatten/paint; (3) `src/ui/layers/` — a bespoke Forge panel (token-
+  only CSS, CSS-pixel eye/lock glyphs by shape not hue, forge-native preview motif).
+  Integrated **`-bea-6`** (the Reviewer/QA-blessed build carrying the keyboard fix),
+  not the gate-named `-bea-2`; re-ran the full objective gate on merged `master`.
+- **Rationale:** Keeping the algebra pure makes the held-out `composite` contract
+  the source of truth and keeps the draw hot path off React. The build-designation
+  reconciliation follows the standing rule (ADR-014 lesson): the newest Reviewer-
+  blessed worktree wins over a stale gate JSON, and integration is proven only on
+  the merged tree.
+- **Consequences:** The panel currently mounts its **own** demo `LayerStack`/history
+  (throwaway-preview pattern, ADR-010/012), so real `CanvasStage` strokes don't land
+  on the active layer and layer undo is via the panel's Revert/Reapply rather than
+  the global Ctrl+Z. **U-012 owns** unifying the tool session + layer stack + one
+  history timeline (M-1/M-2). Grip/nudge glyphs (L-1) and blank-name trimming (L-2)
+  fold into U-012/U-013 polish. Master-spec §3.4/§3.6 unchanged — they describe the
+  end-state target these deferrals converge to, not a per-unit regression.
+
 ## ADR-014 — U-006 history: pure patch/list-edit core + stateful store + session wiring  (2026-07-01)
 - **Context:** Implement ADR-005 (dirty-rect patch commands) as the undo/redo engine.
   Needed a shape that keeps the pure/stateful boundary (constitution §5), proves the
