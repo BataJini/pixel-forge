@@ -827,6 +827,13 @@ export function CanvasStage({ paintColor, indexed, palette }: CanvasStageProps =
         open={exportOpen}
         onClose={() => setExportOpen(false)}
         getSource={() => sessionRef.current?.getBuffer() ?? null}
+        getFrames={() => {
+          // The tool-session preview is single-frame; hand the composited buffer to
+          // the GIF/spritesheet exporters as a one-frame animation. The full
+          // multi-frame pipeline (FrameStack → export) is unified in U-012.
+          const buf = sessionRef.current?.getBuffer();
+          return buf ? [{ buffer: buf, durationMs: 100 }] : [];
+        }}
         title="pixelforge"
       />
     </section>

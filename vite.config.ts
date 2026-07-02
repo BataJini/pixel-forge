@@ -42,6 +42,7 @@ export default defineConfig({
       'docs/acceptance/U-007/**/*.test.{ts,tsx}',
       'docs/acceptance/U-008/**/*.test.{ts,tsx}',
       'docs/acceptance/U-009/**/*.test.{ts,tsx}',
+      'docs/acceptance/U-010/**/*.test.{ts,tsx}',
       'docs/acceptance/U-011/**/*.test.{ts,tsx}',
     ],
     exclude: ['**/node_modules/**', '**/dist/**', 'e2e/**', '**/*.browser.test.{ts,tsx}'],

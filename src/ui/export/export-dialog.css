@@ -134,6 +134,89 @@
   font-weight: inherit;
 }
 
+/* Animation export block — GIF + spritesheet controls, set off by a hard rule. */
+.pf-export__anim {
+  padding-top: var(--space-2);
+  border-top: var(--px) solid var(--c-slag);
+}
+
+.pf-export__anim-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.pf-export__anim-key {
+  margin: 0;
+}
+
+/* Checkbox + label: a hard bevelled tick, Spark focus ring, no radius/blur. */
+.pf-check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  cursor: pointer;
+  color: var(--c-steel);
+}
+
+.pf-check input[type="checkbox"] {
+  appearance: none;
+  inline-size: calc(var(--px) * 8);
+  block-size: calc(var(--px) * 8);
+  margin: 0;
+  background: var(--c-slag);
+  box-shadow: var(--bevel-inset);
+  cursor: pointer;
+}
+
+.pf-check input[type="checkbox"]:checked {
+  background: var(--c-ember);
+  box-shadow: var(--bevel-inset);
+}
+
+.pf-check input[type="checkbox"]:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring), var(--bevel-inset);
+}
+
+/* Number field: an inset well with a crisp VT323-flavored numeric readout. */
+.pf-num {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--c-ash);
+}
+
+.pf-num input[type="number"] {
+  inline-size: calc(var(--px) * 22);
+  padding: var(--space-1) var(--space-2);
+  border: 0;
+  background: var(--c-slag);
+  color: var(--c-steel);
+  box-shadow: var(--bevel-inset);
+  font: inherit;
+}
+
+.pf-num input[type="number"]:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring), var(--bevel-inset);
+}
+
+.pf-export__anim-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-1);
+}
+
+.pf-export__anim-note {
+  color: var(--c-ash);
+  margin: 0;
+  border-top: 0;
+  padding-top: 0;
+}
+
 .pf-export__status {
   margin: 0;
   min-height: calc(var(--px) * 10);

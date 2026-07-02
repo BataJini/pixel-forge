@@ -1,2 +1,2 @@
-/** Export UI barrel (U-009): PNG (scaled) + SVG export dialog. */
-export { ExportDialog, type ExportDialogProps } from './ExportDialog';
+/** Export UI barrel: PNG (scaled) + SVG (U-009) + GIF + spritesheet (U-010) dialog. */
+export { ExportDialog, type ExportDialogProps, type ExportFrame } from './ExportDialog';

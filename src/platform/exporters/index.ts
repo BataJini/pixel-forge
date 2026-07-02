@@ -15,6 +15,13 @@ import { type SaveOutcome, sanitizeFileName, saveBlob, withExtension } from './s
 
 export { bufferToPngBlob, bufferToSvgBlob, type PngEncodeOptions } from './encode';
 export {
+  type EncodeGifOptions,
+  type ExportGifRequest,
+  encodeGifInWorker,
+  exportGifFile,
+  type GifProgress,
+} from './gif';
+export {
   fileSaveSupported,
   type SaveOptions,
   type SaveOutcome,
@@ -22,6 +29,11 @@ export {
   saveBlob,
   withExtension,
 } from './save';
+export {
+  buildSpritesheet,
+  type ExportSpritesheetRequest,
+  exportSpritesheetFile,
+} from './spritesheet';
 
 /** PNG export scales offered by the dialog (master-spec §3.8). */
 export const PNG_SCALES = [1, 2, 4, 8, 16, 32] as const;

@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "browser-fs-access": "^0.38.0",
+    "gifenc": "^1.0.3",
     "idb-keyval": "^6.2.6",
     "react": "^19.2.7",
     "react-dom": "^19.2.7"
