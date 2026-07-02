@@ -1,0 +1,102 @@
+[
+  {
+    "step": "A. App boots (wordmark)",
+    "pass": true,
+    "detail": "wordmark=\"PIXELFORGE\""
+  },
+  {
+    "step": "T. navigator.storage.persist() requested",
+    "pass": true,
+    "detail": "__persistCalled=true"
+  },
+  {
+    "step": "B. New canvas via Welcome (16x16, named)",
+    "pass": true,
+    "detail": "canvas=16x16, title=\"QA Sprite\", palette=\"forge\""
+  },
+  {
+    "step": "D. Paint marks the canvas",
+    "pass": true,
+    "detail": "nonTransparent=6"
+  },
+  {
+    "step": "E. Explicit Save to gallery",
+    "pass": true,
+    "detail": "notice=\"Saved to gallery.\", state=\"Forged\""
+  },
+  {
+    "step": "F. Reload restores exact autosaved project (lossless)",
+    "pass": true,
+    "detail": "before{non:6,sum:25692} after{w:16,h:16,non:6,sum:25692} title=\"QA Sprite\""
+  },
+  {
+    "step": "G. Gallery lists saved project with thumbnail",
+    "pass": true,
+    "detail": "items=1, thumbnails=1"
+  },
+  {
+    "step": "H. Rename in gallery",
+    "pass": true,
+    "detail": "name=\"Renamed Sprite\""
+  },
+  {
+    "step": "I. Duplicate creates a copy",
+    "pass": true,
+    "detail": "count 1->2, names=[\"Renamed Sprite copy\",\"Renamed Sprite\"]"
+  },
+  {
+    "step": "J. Delete with two-step confirm",
+    "pass": true,
+    "detail": "confirmShown=true, count 2->1"
+  },
+  {
+    "step": "K. Open project from gallery",
+    "pass": true,
+    "detail": "canvas=16x16, non=6"
+  },
+  {
+    "step": "L. Resize canvas + undoable",
+    "pass": true,
+    "detail": "resize 16x16->24x20; undo back to 16x16 sumMatch=true"
+  },
+  {
+    "step": "M. Crop canvas + undoable",
+    "pass": true,
+    "detail": "crop 16x16->8x8; undo back sumMatch=true"
+  },
+  {
+    "step": "N. Trim transparent + undoable",
+    "pass": true,
+    "detail": "trim 16x16->1x1 (\"Trimmed to content.\"); undo back to 16x16"
+  },
+  {
+    "step": "O. Import PNG as new canvas",
+    "pass": true,
+    "detail": "canvas=10x12, non=120"
+  },
+  {
+    "step": "P. Import PNG as new layer (size unchanged, layer added)",
+    "pass": true,
+    "detail": "status before=\"Drag to paint Imported · 10×12 · 1 layer\" after=\"Drag to paint red · 10×12 · 2 layers\" size=10x12"
+  },
+  {
+    "step": "Q. Oversize (>512) import rejected + work preserved",
+    "pass": true,
+    "detail": "error=\"That image is 513×513. PixelForge canvases are capped at 512×512 — scale it down first.\"; work 10x12 preserved=true"
+  },
+  {
+    "step": "R. Resize dialog clamps W>512 to 512",
+    "pass": true,
+    "detail": "typed 9999 -> field=\"512\""
+  },
+  {
+    "step": "R2. Welcome dialog clamps W>512 to 512",
+    "pass": true,
+    "detail": "typed 800 -> field=\"512\""
+  },
+  {
+    "step": "U. No uncaught console errors during session",
+    "pass": true,
+    "detail": "none"
+  }
+]

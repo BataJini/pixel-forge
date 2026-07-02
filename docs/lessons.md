@@ -179,3 +179,20 @@ unit is verified, especially after a fix that took several iterations.
   scheduled before U-013's global acceptance run; it is explicitly **not** a builder
   reward-hack (nothing was deleted or weakened) and the four machine-checkable
   criteria are independently covered by QA's own unit/browser/e2e re-runs.
+- **A worktree that adds a runtime dependency reads as a false typecheck/build
+  RED on `master` until `npm install` runs — now the THIRD occurrence (U-011).**
+  U-011 added `idb-keyval` (planned in ADR-001) to `package.json` +
+  `package-lock.json` in its worktree, but `node_modules/idb-keyval` did not exist
+  in the main tree. The first post-merge `npm run typecheck` failed with
+  `TS2307: Cannot find module 'idb-keyval'` (+ a cascading `TS2347` on its generic
+  `get<T>` call) — a pure environment-sync artifact, not a code defect. `npm install`
+  (added 1 package) cleared it and the gate went green (build 0, 597/43, held-out
+  4/4). This is the same shape as U-009 (`browser-fs-access`) and the earlier
+  node_modules reconcile notes: **any worktree merge that touches `package.json`
+  must be followed by `npm install` before the objective gate is trusted, and the
+  first dependency-not-found typecheck error after such a merge must be treated as
+  "sync node_modules first", never as a builder bug.** Process rule going forward:
+  the Integrate step's checklist is (1) resolve conflicts → (2) `npm install` if
+  `git diff --name-only` includes `package.json`/`package-lock.json` → (3) run the
+  gate. Skipping step 2 produces a misleading RED that can waste a fix iteration or
+  wrongly bounce a verified unit back into the loop.

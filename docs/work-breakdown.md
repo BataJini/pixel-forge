@@ -15,7 +15,7 @@ The engine builds a unit only when all its deps are `verified`.
 | U-008 | Animation frames + timeline + onion skin | U-003, U-006, U-007 | §3.5 | verified |
 | U-009 | Export: PNG (scaled) + SVG | U-003 | §3.8, §5 | verified |
 | U-010 | Export: GIF + spritesheet (+JSON atlas) | U-008, U-009 | §3.8, §5 | pending |
-| U-011 | Project persistence + dialogs + image import | U-003, U-005, U-007 | §2, §3.8, §4.3 | pending |
+| U-011 | Project persistence + dialogs + image import | U-003, U-005, U-007 | §2, §3.8, §4.3 | verified |
 | U-012 | App shell: layout, menus, shortcuts, command palette, help | U-002, U-004, U-005, U-006, U-007, U-011 | §2, §3, §3.7 | pending |
 | U-013 | A11y + performance + PWA/offline + final polish | U-008, U-009, U-010, U-011, U-012 | §6, §8 | pending |
 
@@ -322,6 +322,32 @@ The engine builds a unit only when all its deps are `verified`.
 - Deps: U-008, U-009
 
 ### U-011 — Project persistence + dialogs + image import
+- **Status: verified** (2026-07-02, integrated to `master`, 1 iteration — passed
+  Reviewer (advisory-only) + QA (1 MEDIUM non-blocking) + objective gate on worktree
+  `wf_341eca87-03f-3`). Delivered pure `src/core/{project,base64,canvas}.ts`
+  (serialize/deserialize with base64 pixels + 512-cap guards on import and
+  `deserialize`), `src/platform/{persistence,imageImport,projectFile,thumbnail}.ts`
+  (`idb-keyval` gallery, `browser-fs-access` open/save + blob fallback, image decode +
+  thumbnails), `src/state/documentStore.ts` (undoable doc store + save-state), and
+  bespoke `src/ui/project/` dialogs (Welcome/Gallery/Resize/Crop, `ProjectProvider`/
+  `ProjectWorkbench`). Post-merge master gate: typecheck 0, build 0 (JS 355.12 KB /
+  109.30 KB gz), vitest 597/43 (incl held-out U-011 4/4), reward-hack scan clean.
+  Integration was a real 3-way merge (master@`0a0340b` U-008 vs worktree base
+  `6858b2e` U-007): resolved `src/state/index.ts` by keeping **both** `frameStore`
+  (U-008) and `documentStore` (U-011) exports; `npm install` synced the new
+  `idb-keyval` dep (first typecheck was a false `TS2307` RED until node_modules
+  reconciled — see lessons.md). See ADR-017.
+- Follow-ups carried forward (advisory, non-blocking → U-012/U-013):
+  - **QA-1 (MEDIUM → U-012):** Escape does not close the U-011 modals in the
+    integrated app and the global key handler silently clears the canvas selection;
+    rooted in the U-003 window keydown handler. Resolve when U-012 unifies key routing.
+  - **F-3 (MEDIUM → U-012):** "Crop to selection" is not wired to the marquee (the
+    selection only becomes app-global in U-012); Crop-to-canvas works today.
+  - **F-4 (LOW → U-012/U-013):** Resize dialog uses Unicode arrow glyphs, not the
+    bespoke pixel icon sprite; swap when the U-012/U-013 icon set lands.
+  - **F-1/F-2/F-5 (LOW):** post-`openProject` pending-autosave flush, ineffective lazy
+    `browser-fs-access` import, and silent over-long-string truncation in `deserialize`
+    — minor builder follow-ups.
 - Spec ref: §2, §3.8, §4.3
 - Scope: `project.ts` serialize/deserialize (`.forge`, base64 pixels, lossless);
   IndexedDB gallery (`idb-keyval`): save/save-as/open/rename/duplicate/delete/list +

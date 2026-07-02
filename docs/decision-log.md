@@ -2,6 +2,50 @@
 
 ADR style. Newest first.
 
+## ADR-017 — U-011 persistence: `.forge` base64 serializer + `idb-keyval` gallery + bespoke dialogs; integrate `-341eca87-03f-3`  (2026-07-02)
+- **Context:** U-011 needs lossless project persistence (`.forge` file +
+  serialize/deserialize), an IndexedDB gallery (save/save-as/open/rename/duplicate/
+  delete/list + thumbnails), debounced autosave + hydrate-on-load,
+  `storage.persist()`, New/Resize/Crop/Trim dialogs, PNG import (new canvas or
+  layer), and storage-full handling — all honoring the §4.3 512×512 canvas cap and
+  the constitution's data-safety + purity rules, on top of U-003 buffers, U-005
+  color, and U-007 layers.
+- **Decision:** Same three-way split as U-007/U-008: (1) pure `src/core/{project,
+  base64,canvas}.ts` — DOM-free serialize/deserialize with base64 pixel encoding,
+  cap-enforcing guards that reject > 512×512 on both import and `deserialize`; (2)
+  `src/platform/{persistence,imageImport,projectFile,thumbnail}.ts` — `idb-keyval`
+  IndexedDB gallery, `browser-fs-access` file open/save with blob fallback, image
+  decode + thumbnail raster (browser side effects only); (3) `src/state/documentStore.ts`
+  (undoable document store, save-state tracking) + bespoke `src/ui/project/` dialogs
+  (Welcome/Gallery/Resize/Crop, `ProjectProvider`/`ProjectWorkbench`). Adopted
+  `idb-keyval` as the storage primitive exactly as pre-committed in ADR-001.
+  Integrated worktree `wf_341eca87-03f-3` (comprehensive Claude build; the Codex
+  sibling `wf_4f675b3c-bea-13` was a partial core-only attempt, not the deliverable)
+  after committing its uncommitted deliverables onto the worktree branch; re-ran the
+  full objective gate on merged `master`.
+- **Rationale:** Keeping serialize/deserialize and the cap guards in pure `src/core`
+  makes the held-out round-trip + cap-rejection contract the source of truth and keeps
+  IndexedDB/File-System side effects quarantined in `src/platform` per the module
+  boundary. `idb-keyval` is a thin, well-tested wrapper — no bespoke IndexedDB
+  plumbing to test.
+- **Consequences:** Verified in 1 iteration (Review PASS advisory-only, QA PASS with
+  one MEDIUM non-blocking finding, objective gate build 0 / test 0 / 597 tests /
+  held-out 4/4 / reward-hack clean). Integration was a real 3-way merge: master had
+  advanced to U-008 (`0a0340b`) while the worktree branched at U-007 (`6858b2e`) —
+  one conflict in `src/state/index.ts` resolved by keeping **both** the U-008
+  `frameStore` and U-011 `documentStore` export blocks; `vite.config.ts` held-out
+  include auto-merged (U-008 + U-011 globs both present). `idb-keyval` was declared
+  in `package.json` but absent from the main tree's `node_modules`, so the first
+  post-merge typecheck was a false `TS2307` RED cleared by `npm install` (same
+  node_modules-sync artifact as U-009's `browser-fs-access` — see the new lessons.md
+  entry). **Carried forward (advisory, non-blocking):** Escape-to-close on the U-011
+  modals (QA-1, MEDIUM) and Crop-to-selection wiring (Review F-3, MEDIUM) both root
+  in the U-003 global key handler / not-yet-global marquee selection and are best
+  resolved in **U-012** when the app shell unifies selection + key routing; F-4
+  (Unicode arrow glyphs → bespoke sprite) folds into U-012/U-013; F-1/F-2/F-5 (LOW)
+  are minor builder follow-ups. Master-spec §2/§3.8/§4.3 unchanged — reality matched
+  the spec. U-011 unblocks U-012 and contributes to U-013.
+
 ## ADR-016 — U-008 frames: pure frame algebra + undoable store + WeakMap composite cache; integrate `-341eca87-03f-2`  (2026-07-02)
 - **Context:** U-008 needs an animation model (add/duplicate/delete/reorder frames,
   per-frame duration + global FPS, play/pause/loop/ping-pong, onion skin) layered on
