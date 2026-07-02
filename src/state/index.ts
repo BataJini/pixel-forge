@@ -18,6 +18,14 @@ export {
   RESET_FG,
 } from './colorStore';
 export {
+  DEFAULT_ONION,
+  type FrameSnapshot,
+  FrameStack,
+  type FrameStackOptions,
+  frameFromLayers,
+  type OnionConfig,
+} from './frameStore';
+export {
   History,
   type HistoryEntry,
   type HistoryOptions,

@@ -14,6 +14,7 @@
 export * from './buffer';
 export * from './color';
 export * from './exporters';
+export * from './frames';
 export * from './history';
 export * from './layers';
 export * from './palette';
