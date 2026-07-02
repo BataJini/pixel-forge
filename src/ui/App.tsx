@@ -3,6 +3,7 @@ import { CanvasStage } from './CanvasStage';
 import { ColorPalettePanel } from './color/ColorPalettePanel';
 import { ColorProvider, useColorStore } from './color/ColorProvider';
 import { CrtOverlay } from './components/CrtOverlay';
+import { TimelinePanel } from './frames';
 import { LayersPanel } from './layers';
 import { ThemeProvider } from './theme/ThemeProvider';
 import { useTheme } from './theme/useTheme';
@@ -20,7 +21,10 @@ import './App.css';
  * (`ColorPalettePanel`, U-005) — whose foreground color drives the canvas pencil,
  * so picking/loading colors is demonstrably wired to the artwork — and the Layers
  * panel (`LayersPanel`, U-007) with its own undoable layer stack (add/duplicate/
- * delete/rename/reorder/lock/opacity/merge/flatten over a live composite preview).
+ * delete/rename/reorder/lock/opacity/merge/flatten over a live composite preview),
+ * and the Frames / timeline panel (`TimelinePanel`, U-008) with its own undoable
+ * frame stack (add/duplicate/delete/reorder frames, per-frame duration, FPS, play/
+ * pause/stop/loop/ping-pong playback, and onion-skin ghosts over a live preview).
  * In indexed / palette-lock mode the pencil is
  * fed `effectivePaintColor` (the fg snapped to the active palette) and the stage
  * quantizes / palette-swaps its buffer, so drawing is genuinely restricted to the
@@ -47,6 +51,7 @@ function AppBody() {
         <div className="pf-dock">
           <ColorPalettePanel standalone={false} />
           <LayersPanel />
+          <TimelinePanel />
         </div>
       </main>
       <CrtOverlay level={renderedCrtLevel} />

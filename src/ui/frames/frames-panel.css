@@ -1,0 +1,278 @@
+/*
+ * Frames / timeline panel (U-008). Tokens only; hard bevels; no border-radius, no
+ * blurred shadow, no soft/eased motion on chrome (constitution + design-direction).
+ * The preview + thumbnails are TRUE-COLOR pixel surfaces (like the artwork canvas),
+ * not themed chrome, so they legitimately show real colors over the checkerboard.
+ * Onion ghosts are a display-only overlay — never baked into buffers or exports.
+ */
+
+.pf-frames {
+  width: clamp(248px, 24vw, 320px);
+  display: flex;
+  flex-direction: column;
+}
+
+.pf-frames .pf-panel__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* ── self-contained shared primitives (so the panel styles standalone too) ── */
+.pf-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ── live preview: onion ghosts stacked under the current (paintable) frame ── */
+.pf-fpreview {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  box-shadow: var(--bevel-inset);
+  cursor: crosshair;
+  touch-action: none;
+}
+.pf-fpreview__onion,
+.pf-fpreview__canvas {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.pf-fpreview__onion {
+  /* Purely decorative aid; never intercept the paint pointer. */
+  pointer-events: none;
+}
+
+/* ── transport ── */
+.pf-transport {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
+.pf-frames__fps {
+  width: 100%;
+}
+
+/* ── onion controls ── */
+.pf-onion {
+  margin: 0;
+  padding: var(--space-2);
+  border: 0;
+  min-inline-size: 0;
+  background: var(--c-anvil);
+  box-shadow: var(--bevel-inset);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.pf-onion__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+.pf-onion__ranges {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.pf-onion__ranges[data-disabled="true"] {
+  opacity: 0.55;
+}
+
+/* ── paint swatches ── */
+.pf-fpaint {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  border: 0;
+  min-inline-size: 0;
+}
+.pf-fpaint .pf-swatch,
+.pf-frames .pf-swatch {
+  width: calc(var(--px) * 11);
+  height: calc(var(--px) * 11);
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  box-shadow: var(--bevel-raised);
+}
+.pf-fpaint .pf-swatch:hover {
+  box-shadow:
+    0 0 0 var(--px) var(--c-spark),
+    var(--bevel-raised);
+}
+.pf-fpaint .pf-swatch:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring), var(--bevel-raised);
+}
+.pf-fpaint .pf-swatch[aria-pressed="true"] {
+  box-shadow:
+    0 0 0 var(--px) var(--c-anvil),
+    0 0 0 calc(var(--px) * 2) var(--c-ember);
+}
+.pf-frames__hint {
+  color: var(--c-ash);
+  flex: 1 1 100%;
+  margin: 0;
+}
+.pf-frames__hint b {
+  color: var(--c-steel);
+}
+
+/* ── op toolbars ── */
+.pf-frames__ops {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+/* ── timeline strip ── */
+.pf-frames__strip {
+  list-style: none;
+  margin: 0;
+  padding: var(--space-2);
+  display: flex;
+  gap: var(--space-2);
+  overflow-x: auto;
+  background: var(--c-anvil);
+  box-shadow: var(--bevel-inset);
+}
+
+.pf-frame {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  padding: var(--space-1);
+  background: var(--c-iron);
+  box-shadow: var(--bevel-raised);
+}
+.pf-frame[data-active="true"] {
+  /* Active = shape/weight cue, not hue alone: an accent inset ring + ember bar. */
+  box-shadow:
+    var(--bevel-raised),
+    inset 0 calc(var(--px) * 2) 0 0 var(--c-ember);
+}
+
+.pf-frame__thumbbtn {
+  position: relative;
+  display: block;
+  width: calc(var(--px) * 26);
+  height: calc(var(--px) * 26);
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  box-shadow: var(--bevel-inset);
+}
+.pf-frame__thumbbtn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring), var(--bevel-inset);
+}
+.pf-frame__thumb {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+.pf-frame__num {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: 0 var(--px);
+  background: var(--c-slag);
+  color: var(--c-steel);
+  line-height: 1.2;
+}
+.pf-frame[data-active="true"] .pf-frame__num {
+  color: var(--c-ember);
+  font-weight: 700;
+}
+
+.pf-frame__dur {
+  display: flex;
+  align-items: center;
+  gap: var(--px);
+}
+.pf-frame__durinput {
+  width: calc(var(--px) * 18);
+  min-width: 0;
+  padding: 0 var(--px);
+  border: 0;
+  background: var(--c-anvil);
+  color: var(--c-steel);
+  box-shadow: var(--bevel-inset);
+  font-family: var(--font-numeric);
+  font-size: 14px;
+}
+.pf-frame__durinput:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring), var(--bevel-inset);
+}
+.pf-frame__durunit {
+  color: var(--c-ash);
+}
+
+.pf-frame__move {
+  display: flex;
+  gap: var(--px);
+  justify-content: center;
+}
+
+/* ── icon buttons (self-contained; identical to the shared bevel language) ── */
+.pf-frames .pf-iconbtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: calc(var(--px) * 10);
+  height: calc(var(--px) * 10);
+  flex: none;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background: var(--c-iron);
+  color: var(--c-steel);
+  font-family: var(--font-numeric);
+  font-size: 13px;
+  line-height: 1;
+  box-shadow: var(--bevel-raised);
+}
+.pf-frames .pf-iconbtn:hover:not(:disabled) {
+  color: var(--c-ember);
+}
+.pf-frames .pf-iconbtn:active:not(:disabled) {
+  box-shadow: var(--bevel-pressed);
+  transform: translate(var(--px), var(--px));
+}
+.pf-frames .pf-iconbtn:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring), var(--bevel-raised);
+}
+.pf-frames .pf-iconbtn:disabled {
+  color: var(--c-ash);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.pf-frames__status {
+  margin: 0;
+  color: var(--c-ash);
+}
+.pf-frames__status b {
+  color: var(--c-steel);
+}
