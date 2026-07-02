@@ -99,6 +99,21 @@ function readSnapshot(session: ToolSession): Snapshot {
 const isTextTarget = (t: EventTarget | null): boolean =>
   t instanceof HTMLElement && ['INPUT', 'TEXTAREA', 'SELECT'].includes(t.tagName);
 
+// Interactive controls (buttons, links, form fields, anything tab-focusable) that
+// are NOT the canvas well. The UNMODIFIED canvas shortcuts (Enter to stamp, Space
+// to pan, arrows to nudge, single-letter tool keys) must never `preventDefault()`
+// on these, or they cancel the control's own native keyboard activation — which is
+// exactly what made every focused Layers-panel button (New/Duplicate/Delete/Merge/
+// Flatten/visibility/lock/reorder) dead to Enter and Space (WCAG 2.1.1, Level A).
+// Modifier combos (Ctrl/Cmd+Z/Y/A/C/X/V) stay app-global and are handled BEFORE
+// this guard; the canvas well and its <canvas> children are not in this set, so
+// drawing shortcuts still fire when focus rests on the page/body.
+const INTERACTIVE_SELECTOR =
+  'button, [role="button"], a[href], input, select, textarea, [tabindex]';
+
+const isInteractiveTarget = (t: EventTarget | null): boolean =>
+  t instanceof Element && t.closest(INTERACTIVE_SELECTOR) !== null;
+
 interface Wiring {
   renderer: PixelRenderer;
   session: ToolSession;
@@ -242,6 +257,13 @@ function attachKeyboard(
       return;
     }
     if (mod || e.altKey) {
+      return;
+    }
+    // Below here are UNMODIFIED keys that call preventDefault(); bail when the
+    // event comes from a focused interactive control so we never hijack its native
+    // Enter/Space activation (keeps the Layers panel — and every other button —
+    // fully keyboard-operable). See INTERACTIVE_SELECTOR above (WCAG 2.1.1).
+    if (isInteractiveTarget(e.target)) {
       return;
     }
     if (e.key === 'Enter') {

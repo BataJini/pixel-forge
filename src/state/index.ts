@@ -28,6 +28,12 @@ export {
   patchEntry,
 } from './historyStore';
 export {
+  type LayerSnapshot,
+  LayerStack,
+  type LayerStackOptions,
+  layerFromBuffer,
+} from './layerStore';
+export {
   type PointerMods,
   type RenderTarget,
   type ToolId,

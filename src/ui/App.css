@@ -5,10 +5,15 @@
  */
 
 .pf-app {
-  min-height: 100%;
+  /* A definite height (the root is 100% of the viewport) so the workbench gets a
+   * resolvable height: the docked panels then scroll INTERNALLY (their
+   * `max-height: 100%` resolves) instead of stretching the flex row and dragging
+   * the canvas well off-screen. */
+  height: 100%;
   display: flex;
   flex-direction: column;
   background: var(--c-anvil);
+  overflow: hidden;
 }
 
 .pf-topbar {
@@ -58,19 +63,23 @@
   min-width: 0;
 }
 
-.pf-workbench > .pf-color {
+/* Right dock: the stacked workbench panels (Color/Palette, Layers). */
+.pf-dock {
   flex: none;
   align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
   max-height: 100%;
   overflow-y: auto;
 }
 
-/* Narrow / touch: stack the panel under the canvas as a full-width sheet. */
+/* Narrow / touch: stack the dock under the canvas as a full-width sheet. */
 @media (max-width: 720px) {
   .pf-workbench {
     flex-direction: column;
   }
-  .pf-workbench > .pf-color {
+  .pf-workbench > .pf-dock {
     width: 100%;
     align-self: stretch;
   }
