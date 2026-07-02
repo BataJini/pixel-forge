@@ -28,11 +28,30 @@ export {
   readTextFile,
 } from './files';
 export {
+  decodeImageFile,
+  IMPORT_EXTENSIONS,
+  IMPORT_MIME_TYPES,
+  MAX_IMPORT_DIM,
+  validateImageDimensions,
+} from './imageImport';
+export {
   CHECKER_COLORS,
   drawCheckerboard,
   drawPixelGrid,
   drawTileGrid,
 } from './overlays';
+export {
+  createProjectStore,
+  deriveGalleryEntry,
+  estimateStorage,
+  type GalleryEntry,
+  idbKeyValStore,
+  type KeyValStore,
+  ProjectStore,
+  requestPersistentStorage,
+  type StorageEstimate,
+} from './persistence';
+export { exportProjectFile, openProjectFile } from './projectFile';
 export { loadRecentColors, RECENT_COLORS_KEY, saveRecentColors } from './recentColors';
 export {
   createRenderer,
@@ -41,3 +60,4 @@ export {
   type RendererCanvases,
   type RendererConfig,
 } from './renderer';
+export { renderThumbnail } from './thumbnail';

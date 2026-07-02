@@ -18,6 +18,15 @@ export {
   RESET_FG,
 } from './colorStore';
 export {
+  type DocGalleryEntry,
+  type DocPersistence,
+  type DocumentSnapshot,
+  DocumentStore,
+  type DocumentStoreOptions,
+  type NewProjectOptions,
+  type SaveState,
+} from './documentStore';
+export {
   DEFAULT_ONION,
   type FrameSnapshot,
   FrameStack,

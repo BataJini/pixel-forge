@@ -1,0 +1,327 @@
+/*
+ * src/ui/project/project.css — the Project workbench chrome (U-011).
+ * Forge design system only: hard bevels (no blur), zero border-radius on chrome,
+ * integer offsets on the --px grid, design tokens for every color. No soft
+ * gradients (the checker is a token pattern); no cubic-bezier easing.
+ */
+
+/* ── form controls (shared with the Forge inputs) ────────────────────────── */
+.pf-input {
+  min-width: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 0;
+  background: var(--c-iron);
+  color: var(--c-steel);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  box-shadow: var(--bevel-inset);
+}
+.pf-input:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring), var(--bevel-inset);
+}
+.pf-input--num {
+  width: calc(var(--px) * 32);
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+.pf-input--sm {
+  padding: var(--space-1) var(--space-2);
+  font-size: 13px;
+}
+.pf-select--sm {
+  flex: 0 0 auto;
+  padding: var(--space-1) var(--space-2);
+  font-size: 13px;
+}
+.pf-field--stack {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  align-items: stretch;
+}
+.pf-label--sm {
+  font-size: 11px;
+}
+
+/* ── project panel + top bar ──────────────────────────────────────────────── */
+.pf-project {
+  min-width: 0;
+}
+.pf-projbar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-bottom: var(--space-3);
+}
+.pf-projbar__id {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+.pf-projbar__title {
+  flex: 1 1 auto;
+  min-width: calc(var(--px) * 60);
+}
+.pf-projbar__titleinput {
+  width: 100%;
+  font-family: var(--font-display);
+  font-size: 13px;
+}
+.pf-projbar__ops {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.pf-projbar__sep {
+  width: var(--px);
+  align-self: stretch;
+  min-height: calc(var(--px) * 10);
+  background: var(--c-slag);
+  box-shadow: var(--px) 0 0 var(--c-iron-hi);
+}
+.pf-projbar__notice {
+  margin: 0;
+  color: var(--c-patina);
+}
+
+/* ── save-state indicator (shape + value, never hue alone) ────────────────── */
+.pf-savestate {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-1) var(--space-2);
+  font-family: var(--font-ui);
+  font-size: 12px;
+  color: var(--c-ash);
+  box-shadow: var(--bevel-inset);
+  background: var(--c-anvil);
+}
+.pf-savestate__dot {
+  width: calc(var(--px) * 4);
+  height: calc(var(--px) * 4);
+  background: var(--c-ash);
+}
+.pf-savestate--saved {
+  color: var(--c-patina);
+}
+.pf-savestate--saved .pf-savestate__dot {
+  background: var(--c-patina);
+}
+.pf-savestate--unsaved {
+  color: var(--c-spark);
+}
+.pf-savestate--unsaved .pf-savestate__dot {
+  background: var(--c-spark);
+}
+.pf-savestate--saving {
+  color: var(--c-quench);
+}
+.pf-savestate--saving .pf-savestate__dot {
+  background: var(--c-quench);
+}
+.pf-savestate--error {
+  color: var(--c-warning);
+}
+.pf-savestate--error .pf-savestate__dot {
+  background: var(--c-warning);
+}
+
+/* ── project canvas stage ─────────────────────────────────────────────────── */
+.pf-project__stage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+.pf-project__well {
+  position: relative;
+  aspect-ratio: 1 / 1;
+  width: 100%;
+  max-width: calc(var(--px) * 140);
+  margin-inline: auto;
+  box-shadow: var(--bevel-inset);
+  touch-action: none;
+  cursor: crosshair;
+}
+.pf-project__canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  image-rendering: pixelated;
+}
+.pf-project__paint {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.pf-project__status {
+  margin: 0;
+}
+.pf-project__error {
+  margin: var(--space-1) 0 0;
+  color: var(--c-warning);
+  font-family: var(--font-ui);
+  font-size: 13px;
+}
+
+/* ── image import row ─────────────────────────────────────────────────────── */
+.pf-import {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+
+/* ── Welcome / New-Canvas dialog ──────────────────────────────────────────── */
+.pf-welcome__sizes,
+.pf-resize__anchor {
+  border: 0;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+}
+.pf-welcome__presets {
+  display: flex;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-top: var(--space-2);
+}
+.pf-welcome__custom {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-2);
+  margin-top: var(--space-3);
+  flex-wrap: wrap;
+}
+.pf-welcome__x {
+  padding-bottom: var(--space-2);
+  color: var(--c-ash);
+}
+.pf-welcome__cap {
+  margin: 0 0 var(--space-1);
+}
+
+/* ── Resize anchor 3×3 grid ───────────────────────────────────────────────── */
+.pf-resize__grid {
+  display: grid;
+  grid-template-columns: repeat(3, calc(var(--px) * 16));
+  gap: var(--px);
+  margin-top: var(--space-2);
+  width: max-content;
+}
+.pf-anchor-cell {
+  display: grid;
+  place-items: center;
+  width: calc(var(--px) * 16);
+  height: calc(var(--px) * 16);
+  border: 0;
+  background: var(--c-iron);
+  color: var(--c-ash);
+  box-shadow: var(--bevel-raised);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+.pf-anchor-cell[data-active="true"] {
+  background: var(--c-ember);
+  color: var(--c-anvil);
+}
+.pf-anchor-cell:focus-within {
+  outline: none;
+  box-shadow: var(--focus-ring), var(--bevel-raised);
+}
+
+/* ── Crop dialog ──────────────────────────────────────────────────────────── */
+.pf-crop__fields {
+  display: flex;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+/* ── Gallery ──────────────────────────────────────────────────────────────── */
+.pf-gallery__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  max-height: calc(var(--px) * 190);
+  overflow-y: auto;
+}
+.pf-gallery__item {
+  display: grid;
+  grid-template-columns: calc(var(--px) * 28) 1fr auto;
+  gap: var(--space-3);
+  align-items: center;
+  padding: var(--space-2);
+  background: var(--c-anvil);
+  box-shadow: var(--bevel-inset);
+}
+.pf-gallery__item[data-current="true"] {
+  box-shadow: var(--focus-ring), var(--bevel-inset);
+}
+.pf-gallery__thumb {
+  width: calc(var(--px) * 28);
+  height: calc(var(--px) * 28);
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  box-shadow: var(--bevel-inset);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.pf-gallery__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+.pf-gallery__noimg {
+  font-family: var(--font-ui);
+  font-size: 10px;
+  color: var(--c-ash);
+}
+.pf-gallery__meta {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+.pf-gallery__name {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  color: var(--c-steel);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pf-gallery__dims {
+  margin: 0;
+}
+.pf-gallery__ops {
+  display: flex;
+  gap: var(--space-1);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+.pf-gallery__empty {
+  margin: var(--space-3) 0;
+}
+
+/* ── a11y utility (self-contained copy so isolated mounts hide the file input) */
+.pf-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
