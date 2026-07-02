@@ -1,6 +1,6 @@
 {
   "project": "pixel-forge",
-  "phase": "building",
+  "phase": "done",
   "units": [
     {
       "id": "U-001",
@@ -131,8 +131,8 @@
         "U-011",
         "U-012"
       ],
-      "status": "pending",
-      "iterations": 0
+      "status": "verified",
+      "iterations": 1
     }
   ],
   "caps": {
