@@ -12,7 +12,7 @@ The engine builds a unit only when all its deps are `verified`.
 | U-005 | Color & palette system | U-002, U-003 | §3.3, §4.4, §5 | verified |
 | U-006 | History / undo-redo | U-003, U-004 | §3.6, §5 | verified |
 | U-007 | Layers panel & management | U-003, U-006 | §3.4, §4.1 | verified |
-| U-008 | Animation frames + timeline + onion skin | U-003, U-006, U-007 | §3.5 | pending |
+| U-008 | Animation frames + timeline + onion skin | U-003, U-006, U-007 | §3.5 | verified |
 | U-009 | Export: PNG (scaled) + SVG | U-003 | §3.8, §5 | verified |
 | U-010 | Export: GIF + spritesheet (+JSON atlas) | U-008, U-009 | §3.8, §5 | pending |
 | U-011 | Project persistence + dialogs + image import | U-003, U-005, U-007 | §2, §3.8, §4.3 | pending |
@@ -247,6 +247,32 @@ The engine builds a unit only when all its deps are `verified`.
   bespoke grip/nudge glyphs (L-1); trim/fallback for blank layer names (L-2).
 
 ### U-008 — Animation frames + timeline + onion skin
+- **Status: verified** (2026-07-02, integrated to `master`, 1 iteration — passed
+  Reviewer + QA + objective gate first try on worktree `wf_341eca87-03f-2`).
+  Delivered `src/core/frames.ts` (pure frame algebra: `addLayerToAllFrames`,
+  `duplicateFrame` deep-copy, `deleteFrame`/`canDeleteFrame` guard, `moveFrame`,
+  `buildTimeline`/`frameIndexAtTime`, `selectOnionFrames`), `src/state/frameStore.ts`
+  (undoable store, `WeakMap` composite cache keyed by frame identity),
+  `src/ui/frames/` (bespoke Forge `TimelinePanel`/`OnionGhosts`/`FrameThumb`/
+  `FramesProvider`/`useFramePlayback` + hammer-strike seed motif), and
+  `e2e/frames.spec.ts`. Post-merge master gate: build 0 (JS 318.15 KB / 98.96 KB gz),
+  vitest 523/35, reward-hack scan clean. Builder deliverables were **uncommitted** in
+  the worktree (branch tip == `master@6858b2e`); committed on the worktree branch then
+  `merge --no-ff` (no conflicts; master had no `src/core/frames.ts`). See ADR-016.
+- Follow-ups carried forward (advisory, non-blocking):
+  - **M-1 (verification-integrity, owner: manager/Architect):** `docs/acceptance/U-008/`
+    ships only `criteria.md` — **no held-out `*.acceptance.test.ts`**, so the objective
+    gate's held-out-suite check passed *vacuously*. Only builder-authored (thus
+    builder-editable) frame tests ran. Author `docs/acceptance/U-008/frames.acceptance.test.ts`
+    (importing ONLY `src/core/frames.ts` per the module boundary) before the U-013
+    global acceptance check. All four machine-checkable criteria are still covered by
+    the builder unit/browser/e2e suites + independent QA runs, so correctness risk is low.
+  - **L-1 (history byte accounting):** structural undo entries under-weight retained
+    memory (`addFrame`/`duplicateFrame` record one buffer's worth though they mint
+    `layerCount`; `addLayer` records one though it mints `frameCount`) — the §6 ~64 MB
+    cap can overshoot before eviction. Fold into U-013's memory pass.
+  - **L-2 (cosmetic):** non-loop ping-pong playback parks on the last frame rather than
+    the ping-pong cycle's final interior frame; spec undefined here. Optional U-013 tune-up.
 - Spec ref: §3.5
 - Scope: frame model + timeline UI (add/duplicate/delete/reorder, per-frame
   duration, FPS), play/pause/loop/ping-pong, onion skin (prev/next tint + range),

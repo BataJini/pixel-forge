@@ -156,3 +156,26 @@ unit is verified, especially after a fix that took several iterations.
   pile of loose files. (c) Treat older `-artifacts/` logs as stale unless their
   named worktree matches the integrated build; cite only the round that validated
   the merged build so the docs don't drift.
+- **An empty held-out acceptance dir makes the objective gate's "held-out tests
+  pass" check pass *vacuously* — a silent hole in the verification story (U-008).**
+  `docs/acceptance/U-008/` shipped only `criteria.md` with no `*.acceptance.test.ts`
+  (unlike U-003/U-004/U-006/U-007/U-009, which each ship one). The builder correctly
+  added the `docs/acceptance/U-008/**` include glob to `vite.config.ts` and correctly
+  refused to author files inside the protected dir — so the glob matched **zero**
+  files and the gate reported "held-out tests pass" while running *nothing*
+  builder-independent. The gate JSON's own `evidence` even flagged this, yet all four
+  headline criteria (`build=0`, `test=0`, artifacts present, no reward-hack) were
+  literally satisfied, so nothing *blocked*. Root cause: the held-out suite is an
+  Architect/manager deliverable authored **before** the unit builds, and that step
+  was skipped for U-008; the Verifier treats "glob matched 0 files" as a pass rather
+  than an alarm. Process rules going forward: (a) the Architect must author each
+  unit's `docs/acceptance/<unit>/*.acceptance.test.ts` (importing ONLY that unit's
+  pure `src/core/*` module per the boundary rule) as a build precondition, and the
+  Plan step should refuse to mark a unit `ready` if its acceptance dir has only
+  `criteria.md`; (b) the objective gate must treat a held-out include glob that
+  matches **zero** files as a FAIL (or an explicit `heldOutFilesMatched: 0` flag the
+  Verifier must clear), never a silent pass — a vacuous check is worse than no check
+  because it reads green. For U-008 this is a tracked manager action item (M-1),
+  scheduled before U-013's global acceptance run; it is explicitly **not** a builder
+  reward-hack (nothing was deleted or weakened) and the four machine-checkable
+  criteria are independently covered by QA's own unit/browser/e2e re-runs.

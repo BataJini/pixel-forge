@@ -2,6 +2,41 @@
 
 ADR style. Newest first.
 
+## ADR-016 — U-008 frames: pure frame algebra + undoable store + WeakMap composite cache; integrate `-341eca87-03f-2`  (2026-07-02)
+- **Context:** U-008 needs an animation model (add/duplicate/delete/reorder frames,
+  per-frame duration + global FPS, play/pause/loop/ping-pong, onion skin) layered on
+  top of U-003 buffers, U-006 history, and U-007 layers, with layers kept consistent
+  across every frame and all ops undoable — plus the §6 budget guarantee that
+  onion-skin compositing at 512×512 with multiple layers/ghosts stays within frame.
+- **Decision:** Same three-way split as U-007 per the constitution's module
+  boundaries: (1) `src/core/frames.ts` — pure, DOM/id-free frame algebra
+  (`addLayerToAllFrames` mints a distinct buffer per frame, `duplicateFrame`
+  deep-copies pixels, `deleteFrame`/`canDeleteFrame` guards the last frame, `moveFrame`
+  reorders immutably, `buildTimeline`/`frameIndexAtTime` derive playback order + timing
+  incl. ping-pong, `selectOnionFrames` picks N-prev/N-next never-current with
+  clamping); (2) `src/state/frameStore.ts` — an undoable store with copy-on-write
+  stroke capture and a `WeakMap` composite cache keyed by frame identity (only dirty
+  frames recomposite; ghosts computed only while paused); (3) `src/ui/frames/` — a
+  bespoke Forge timeline (token-only CSS, functional warm/cool ghost tints independent
+  of theme like the checkerboard, VT323 numeric readouts, hammer-strike seed motif).
+  Integrated worktree `wf_341eca87-03f-2` after committing its uncommitted deliverables
+  onto the worktree branch; re-ran the full objective gate on merged `master`.
+- **Rationale:** Keeping the algebra pure makes the held-out frame contract the source
+  of truth and keeps compositing off the React path; the `WeakMap`-by-frame-identity
+  cache is the cheapest way to honor §6 without a manual dirty-flag protocol. The
+  buffer-per-frame invariant (distinct bytes, not shared references) is what makes
+  onion ghosts and per-frame edits correct.
+- **Consequences:** Verified first try (Review PASS advisory-only, QA PASS, gate
+  build 0 / test 0 / 523 tests / reward-hack clean). **Held-out-suite gap (M-1):**
+  `docs/acceptance/U-008/` has only `criteria.md`, so the builder's held-out include
+  glob matched zero files and the gate's held-out check passed vacuously — the
+  manager/Architect must author `frames.acceptance.test.ts` before U-013's global
+  acceptance check (this is an acceptance-authoring gap, **not** a builder reward-hack:
+  nothing was deleted or weakened, and the builder correctly refused to write into the
+  protected dir). History byte-accounting under-count (L-1) and the cosmetic non-loop
+  ping-pong resting frame (L-2) fold into U-013. Master-spec §3.5 unchanged — reality
+  matched the spec. U-008 now unblocks U-010 (GIF/spritesheet) and U-013.
+
 ## ADR-015 — U-007 layers: pure layer algebra + undoable store + bespoke panel; integrate `-bea-6`  (2026-07-02)
 - **Context:** U-007 needs a layer stack (add/dup/delete/rename/reorder/lock/
   opacity/merge-down/flatten) whose composite is deterministic and testable against
