@@ -1,0 +1,88 @@
+/* Menu bar (U-012) — hard-edged, token-driven dropdowns. */
+.pf-menubar {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  background: var(--c-iron);
+  border-bottom: var(--px) solid var(--c-slag);
+}
+
+.pf-menubar__group {
+  position: relative;
+}
+
+.pf-menubar__label {
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--c-steel);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+}
+
+.pf-menubar__label:hover,
+.pf-menubar__label.is-open {
+  background: var(--c-ember-deep);
+  color: var(--c-anvil);
+}
+
+.pf-menubar__label:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+
+.pf-menubar__menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  z-index: 50;
+  min-width: 200px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  background: var(--c-iron);
+  box-shadow: var(--bevel-raised);
+  border: var(--px) solid var(--c-slag);
+}
+
+.pf-menubar__item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  width: 100%;
+  box-sizing: border-box;
+  appearance: none;
+  border: none;
+  background: transparent;
+  color: var(--c-steel);
+  font-family: var(--font-ui);
+  font-size: 13px;
+  text-align: left;
+  padding: var(--space-2) var(--space-3);
+  cursor: pointer;
+}
+
+.pf-menubar__item:hover:not(:disabled),
+.pf-menubar__item:focus-visible:not(:disabled) {
+  outline: none;
+  background: var(--c-ember-deep);
+  color: var(--c-anvil);
+}
+
+.pf-menubar__item:disabled {
+  color: var(--c-iron-hi);
+  cursor: default;
+}
+
+.pf-menubar__kbd {
+  font-family: var(--font-numeric);
+  font-size: 11px;
+  color: var(--c-ash);
+}
+
+.pf-menubar__item:hover:not(:disabled) .pf-menubar__kbd {
+  color: var(--c-anvil);
+}

@@ -1,0 +1,85 @@
+/* Help overlay (U-012) — hard-edged bevel panel, token-driven. */
+.pf-help {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  background: color-mix(in srgb, var(--c-slag) 78%, transparent);
+}
+
+.pf-help__box:focus {
+  outline: none;
+}
+
+.pf-help__box {
+  width: min(640px, 94vw);
+  max-height: 84vh;
+  overflow-y: auto;
+  background: var(--c-iron);
+  box-shadow: var(--bevel-raised);
+  border: var(--px) solid var(--c-slag);
+}
+
+.pf-help__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border-bottom: var(--px) solid var(--c-iron-hi);
+}
+
+.pf-help__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 16px;
+  color: var(--c-ember);
+  text-transform: uppercase;
+}
+
+.pf-help__grid {
+  margin: 0;
+  padding: var(--space-3);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-1) var(--space-4);
+}
+
+.pf-help__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-1) 0;
+}
+
+.pf-help__keys {
+  margin: 0;
+}
+
+.pf-help__keys kbd {
+  font-family: var(--font-numeric);
+  font-size: 12px;
+  color: var(--c-flame);
+  background: var(--c-anvil);
+  padding: 0 var(--space-1);
+  border: var(--px) solid var(--c-iron-hi);
+  white-space: nowrap;
+}
+
+.pf-help__label {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  color: var(--c-ash);
+  text-align: right;
+}
+
+@media (max-width: 560px) {
+  .pf-help__grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -1,0 +1,96 @@
+/* Command palette (U-012). Hard-edged, bevelled, theme-token driven — no radius,
+   no blur, no soft shadow (constitution). */
+.pf-cmdk {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 12vh;
+  background: color-mix(in srgb, var(--c-slag) 78%, transparent);
+}
+
+.pf-cmdk__box {
+  width: min(560px, 92vw);
+  background: var(--c-iron);
+  box-shadow: var(--bevel-raised);
+  border: var(--px) solid var(--c-slag);
+}
+
+.pf-cmdk__input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: var(--space-3);
+  background: var(--c-anvil);
+  color: var(--c-steel);
+  font-family: var(--font-ui);
+  font-size: 16px;
+  border: none;
+  border-bottom: var(--px) solid var(--c-iron-hi);
+  outline: none;
+}
+
+.pf-cmdk__input:focus-visible {
+  box-shadow: var(--focus-ring);
+}
+
+.pf-cmdk__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 46vh;
+  overflow-y: auto;
+}
+
+.pf-cmdk__item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  color: var(--c-steel);
+  cursor: pointer;
+}
+
+.pf-cmdk__item.is-active {
+  background: var(--c-ember-deep);
+  color: var(--c-anvil);
+}
+
+.pf-cmdk__group {
+  font-family: var(--font-tiny);
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--c-ash);
+  min-width: 52px;
+}
+
+.pf-cmdk__item.is-active .pf-cmdk__group {
+  color: var(--c-anvil);
+}
+
+.pf-cmdk__title {
+  flex: 1;
+  font-family: var(--font-ui);
+}
+
+.pf-cmdk__kbd {
+  font-family: var(--font-numeric);
+  font-size: 12px;
+  color: var(--c-ash);
+  background: var(--c-anvil);
+  padding: 0 var(--space-1);
+  border: var(--px) solid var(--c-iron-hi);
+}
+
+.pf-cmdk__item.is-active .pf-cmdk__kbd {
+  color: var(--c-anvil);
+  background: var(--c-spark);
+  border-color: var(--c-spark);
+}
+
+.pf-cmdk__empty {
+  padding: var(--space-3);
+  color: var(--c-ash);
+  font-family: var(--font-ui);
+}

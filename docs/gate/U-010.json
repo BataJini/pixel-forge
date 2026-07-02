@@ -1,0 +1,9 @@
+{
+  "unit": "U-010",
+  "ranCommands": true,
+  "buildExit": 0,
+  "testExit": 0,
+  "artifactsPresent": true,
+  "rewardHackFlags": [],
+  "evidence": "Location note: U-010 has no separate unmerged worktree branch; it is already integrated on master (HEAD 9f2f6f5 'feat: integrate U-010 export GIF + spritesheet (+JSON atlas)') and state.json marks it verified. Every listed worktree predates U-010 (shows its acceptance test as deleted vs master). So U-010's real code lives in the main checkout and was verified there. `npm run build` (tsc -b && vite build): exit 0, 146 modules, emitted separate GIF worker chunk dist/assets/gifWorker-CIymUejH.js (worker-based encode per spec). `npx vitest run` (full suite): 47 files / 640 tests passed, exit 0. Targeted `npx vitest run docs/acceptance/U-010/export.acceptance.test.ts src/core/exporters/gif.test.ts src/core/exporters/spritesheet.test.ts`: 3 files / 38 tests passed, exit 0 — held-out acceptance test executes (vite.config.ts include list contains docs/acceptance/U-010/**). Artifacts present: src/core/exporters/{gif.ts,spritesheet.ts,index.ts}, src/platform/exporters/{gif.ts,gifWorker.ts,spritesheet.ts}, src/ui/export/ExportDialog.tsx, src/types/gifenc.d.ts, docs/acceptance/U-010/export.acceptance.test.ts. Reward-hack scan of commit 9f2f6f5 diff: no .skip/.only/.todo/xit, no @ts-ignore/@ts-expect-error, no process.exit/early-return masking, no over-mocking of units under test; gif.ts performs real encoding via gifenc (GIFEncoder/quantize/applyPalette) and packFrames has real geometry logic. Held-out test + criteria.md show zero diff vs HEAD (untampered by builder). Uncommitted working-tree changes present belong to a different unit (U-012 shell scaffolding) and do not affect U-010."
+}
