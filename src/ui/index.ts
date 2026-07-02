@@ -18,4 +18,19 @@ export {
   type LayersProviderProps,
   useLayerStore,
 } from './layers';
+export {
+  CropDialog,
+  GalleryDialog,
+  ImportImageControl,
+  ProjectBar,
+  ProjectProvider,
+  type ProjectProviderProps,
+  ProjectStage,
+  type ProjectStoreValue,
+  ProjectWorkbench,
+  type ProjectWorkbenchProps,
+  ResizeDialog,
+  useProject,
+  WelcomeDialog,
+} from './project';
 export * from './theme';

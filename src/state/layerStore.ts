@@ -106,8 +106,10 @@ function accumulate(a: Rect | null, b: Rect | null): Rect | null {
 export class LayerStack {
   private layers: Layer[];
   private activeId: string;
-  private readonly w: number;
-  private readonly h: number;
+  // Canvas size is mutable: a resize/crop/trim canvas op (U-011) changes it as an
+  // undoable structural edit via {@link resizeCanvas}; every other op keeps it fixed.
+  private w: number;
+  private h: number;
   private readonly history: History;
   private readonly onChangeCb: () => void;
   private readonly listeners = new Set<() => void>();
@@ -365,6 +367,88 @@ export class LayerStack {
     const next = coreFlatten(this.layers);
     this.commit('Flatten image', { layers: next, activeId: next[0].id }, this.bufferBytes());
     return true;
+  }
+
+  // ── import + canvas structural ops (U-011) ─────────────────────────────────
+
+  /**
+   * Add a layer whose pixels come from an imported image (import-as-layer), placed
+   * directly above the active layer and made active. The buffer must already match
+   * the canvas size (the caller composes it onto a canvas-sized buffer). One undo
+   * entry.
+   */
+  addLayerWithBuffer(buffer: PixelBuffer, name?: string): void {
+    const at = this.getActiveIndex() + 1;
+    const layer = layerFromBuffer(this.nextId(), name ?? this.nextName(), buffer);
+    this.commit(
+      'Import layer',
+      { layers: insertLayer(this.layers, at, layer), activeId: layer.id },
+      buffer.data.length,
+    );
+  }
+
+  /**
+   * Canvas resize / crop / trim: remap EVERY layer's buffer through `mapBuffer`
+   * and set the new canvas size as ONE undo entry. `side` runs extra effects in
+   * lockstep with undo/redo (e.g. transforming a loaded project's other frames)
+   * so the whole document stays consistent across undo. No-op on a locked active
+   * layer is NOT enforced here — resize applies to the whole canvas, not one layer.
+   */
+  resizeCanvas(
+    newW: number,
+    newH: number,
+    mapBuffer: (buf: PixelBuffer) => PixelBuffer,
+    label: string,
+    side?: { readonly apply: () => void; readonly revert: () => void },
+  ): void {
+    const w = Math.max(1, Math.trunc(newW));
+    const h = Math.max(1, Math.trunc(newH));
+    const prevW = this.w;
+    const prevH = this.h;
+    const prevLayers = this.layers;
+    const nextLayers = this.layers.map((l) => ({ ...l, buffer: mapBuffer(l.buffer) }));
+    const activeId = this.activeId;
+    const applyNext = (): void => {
+      this.layers = nextLayers;
+      this.w = w;
+      this.h = h;
+      this.activeId = this.indexOf(activeId) >= 0 ? activeId : this.fallbackActive(nextLayers);
+      side?.apply();
+    };
+    const revert = (): void => {
+      this.layers = prevLayers;
+      this.w = prevW;
+      this.h = prevH;
+      this.activeId = this.indexOf(activeId) >= 0 ? activeId : this.fallbackActive(prevLayers);
+      side?.revert();
+    };
+    applyNext();
+    this.history.record({
+      label,
+      bytes: 256 + w * h * 4 * nextLayers.length,
+      undo: revert,
+      redo: applyNext,
+    });
+  }
+
+  /**
+   * Replace the whole document (New / Open): set a new canvas size + layer stack
+   * and CLEAR the undo history (a fresh document has no prior state to undo to).
+   * Emits once. Not itself undoable.
+   */
+  reset(w: number, h: number, layers: Layer[], activeId?: string): void {
+    this.w = Math.max(1, Math.trunc(w));
+    this.h = Math.max(1, Math.trunc(h));
+    this.layers =
+      layers.length > 0
+        ? layers.slice()
+        : [blankLayer(this.nextId(), this.nextName(), this.w, this.h)];
+    this.seedSequences(this.layers);
+    this.activeId =
+      activeId && this.indexOf(activeId) >= 0 ? activeId : this.layers[this.layers.length - 1].id;
+    this.stroke = null;
+    this.history.clear();
+    this.emit();
   }
 
   // ── pixel editing on the active layer (dirty-rect patch) ───────────────────

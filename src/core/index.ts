@@ -11,13 +11,16 @@
 
 // Engine surface (master-spec §5). Held-out tests import concrete modules by
 // their exact paths (e.g. `src/core/buffer`); this barrel is for app-internal use.
+export * from './base64';
 export * from './buffer';
+export * from './canvas';
 export * from './color';
 export * from './exporters';
 export * from './history';
 export * from './layers';
 export * from './palette';
 export * from './path';
+export * from './project';
 export * from './rect';
 export * from './selection';
 export * from './tools';

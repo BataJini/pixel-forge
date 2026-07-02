@@ -4,6 +4,7 @@ import { ColorPalettePanel } from './color/ColorPalettePanel';
 import { ColorProvider, useColorStore } from './color/ColorProvider';
 import { CrtOverlay } from './components/CrtOverlay';
 import { LayersPanel } from './layers';
+import { ProjectWorkbench } from './project';
 import { ThemeProvider } from './theme/ThemeProvider';
 import { useTheme } from './theme/useTheme';
 import './App.css';
@@ -24,9 +25,12 @@ import './App.css';
  * In indexed / palette-lock mode the pencil is
  * fed `effectivePaintColor` (the fg snapped to the active palette) and the stage
  * quantizes / palette-swaps its buffer, so drawing is genuinely restricted to the
- * palette. The full workbench layout — menu bar, tool rack, dockable panels, the
- * U-002 design-system showcase — is assembled in U-012. Styling uses only design
- * tokens and hard-edged bevels.
+ * palette. The right dock also mounts the U-011 `ProjectWorkbench` (project
+ * persistence + New/Open gallery/Save/Import/Resize/Crop/Trim dialogs over a live,
+ * autosaved document) as a self-contained surface; it keeps its OWN layer stack so
+ * the pre-existing tool/color/layers demos above stay untouched. The full workbench
+ * layout — menu bar, tool rack, dockable panels, the U-002 design-system showcase —
+ * is assembled in U-012. Styling uses only design tokens and hard-edged bevels.
  */
 function AppBody() {
   const { renderedCrtLevel } = useTheme();
@@ -45,6 +49,7 @@ function AppBody() {
           palette={state.palette}
         />
         <div className="pf-dock">
+          <ProjectWorkbench />
           <ColorPalettePanel standalone={false} />
           <LayersPanel />
         </div>
