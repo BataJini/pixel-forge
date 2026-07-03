@@ -1,0 +1,14 @@
+{
+  "unit": "U-012",
+  "ranCommands": true,
+  "buildExit": 0,
+  "testExit": 1,
+  "artifactsPresent": true,
+  "rewardHackFlags": [
+    "Unit's own held-out test is not wired into the runnable suite: vite.config.ts test.include activates docs/acceptance/U-003..U-009 and U-011 but OMITS U-012 (and U-010), so `npm test` / the objective gate never runs the U-012 command-palette acceptance test — masking the fuzzyRank failure that a passing gate would otherwise expose.",
+    "The U-012 held-out test file (docs/acceptance/U-012/shell.acceptance.test.ts) is absent from the builder worktree entirely; only criteria.md is present, so the builder-wired suite cannot exercise the authoritative §3.7 command-palette test."
+  ],
+  "worktree": "C:/Users/bata/Projects/pixel-forge/.claude/worktrees/wf_dfb05be4-887-3",
+  "evidence": "Selected worktree wf_dfb05be4-887-3 as THE U-012 builder worktree: it is branched from U-011 (HEAD 9bbffd2, U-012's dependency base) and introduces the app shell as new/uncommitted work (untracked src/ui/shell/, e2e/shell.spec.ts) — i.e. U-012 genuinely unmerged. (Rejected siblings -887-10/-14: branched from the already-completed master de248e3, which ALREADY contains an integrated U-012 with fuzzyRank + the U-012 vite include; those inherit a passing shell and add a later src/ui/workbench redesign — not the unmerged U-012, and can't be a valid U-012 base since de248e3 also contains U-013.) Commands run INSIDE -887-3: `npm run build` (tsc -b && vite build) -> exit 0, dist/ emitted (index.html, assets/index-DEN-h-VL.js 383.24kB/118.68kB gz, index-C6oSLU7t.css 45.15kB). `npm test` (vitest run, builder-wired) -> 48 files / 673 tests passed, exit 0 — BUT excludes the U-012 held-out test (not in vite.config include; file not in worktree). Ran the AUTHORITATIVE held-out test (docs/acceptance/U-012/shell.acceptance.test.ts from main) against this worktree's src via an explicit vitest config -> 5 failed / 5, exit 1, every case 'TypeError: fuzzyRank is not a function'. Root cause: this worktree's src/ui/shell/fuzzy.ts exports fuzzyMatch/fuzzyScore/fuzzyFilter but NOT fuzzyRank, the API the held-out test (master-spec §3.7 command palette) targets; shell/index.ts re-exports only fuzzyMatch/fuzzyScore/fuzzyFilter; no fuzzyRank exists anywhere in src/. Diff reward-hack scan otherwise clean of skip/only/xit/todo/process.exit, but two masking flags recorded (U-012 held-out suite not activated in vite.config; held-out test file absent from worktree). Worktree left pristine after verification (temp config + copied held-out test removed, tracked criteria.md restored). GATE FAILS: testExit=1 (held-out acceptance fails) AND rewardHackFlags non-empty.",
+  "ts": "2026-07-03T01:06:00Z"
+}

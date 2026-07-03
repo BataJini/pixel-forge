@@ -63,15 +63,48 @@
   min-width: 0;
 }
 
-/* Right dock: the stacked workbench panels (Color/Palette, Layers). */
+/* Right dock: the stacked workbench panels (Color/Palette, Layers, Frames).
+ * A slim FIXED width so the canvas — not the panels — owns the screen. */
 .pf-dock {
   flex: none;
-  align-self: flex-start;
+  width: 340px;
+  box-sizing: border-box;
+  align-self: stretch;
   display: flex;
   flex-direction: column;
   gap: var(--space-5);
   max-height: 100%;
   overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* Panels fill the slim dock rather than forcing it wider. */
+.pf-dock > * {
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+/* Right-align the Focus toggle in the top bar. */
+.pf-focus-toggle {
+  margin-left: auto;
+}
+
+/* Focus / fullscreen drawing mode — hide the chrome + dock, canvas fills. */
+.pf-app[data-focus='true'] .pf-topbar,
+.pf-app[data-focus='true'] .pf-dock {
+  display: none;
+}
+
+.pf-app[data-focus='true'] .pf-workbench {
+  padding: var(--space-2);
+}
+
+.pf-focus-exit {
+  position: fixed;
+  top: var(--space-2);
+  right: var(--space-2);
+  z-index: 40;
 }
 
 /* Narrow / touch: stack the dock under the canvas as a full-width sheet. */

@@ -1,3 +1,4 @@
+import { useCallback, useEffect, useState } from 'react';
 import { effectivePaintColor } from '../state/colorStore';
 import { CanvasStage } from './CanvasStage';
 import { ColorPalettePanel } from './color/ColorPalettePanel';
@@ -5,7 +6,6 @@ import { ColorProvider, useColorStore } from './color/ColorProvider';
 import { CrtOverlay } from './components/CrtOverlay';
 import { TimelinePanel } from './frames';
 import { LayersPanel } from './layers';
-import { ProjectWorkbench } from './project';
 import { ThemeProvider } from './theme/ThemeProvider';
 import { useTheme } from './theme/useTheme';
 import './App.css';
@@ -39,12 +39,62 @@ import './App.css';
 function AppBody() {
   const { renderedCrtLevel } = useTheme();
   const { state } = useColorStore();
+  const [focus, setFocus] = useState(false);
+
+  // Focus / fullscreen drawing mode: hide the chrome + dock so the canvas fills the
+  // viewport. Best-effort native Fullscreen API on top of the CSS focus layout.
+  const toggleFocus = useCallback(() => {
+    setFocus((f) => {
+      const next = !f;
+      try {
+        if (next && !document.fullscreenElement) {
+          void document.documentElement.requestFullscreen?.().catch(() => {});
+        } else if (!next && document.fullscreenElement) {
+          void document.exitFullscreen?.().catch(() => {});
+        }
+      } catch {
+        /* fullscreen may be blocked; the CSS focus layout still applies */
+      }
+      return next;
+    });
+  }, []);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent): void => {
+      const t = e.target as HTMLElement | null;
+      const typing = !!t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable);
+      if (typing || e.ctrlKey || e.metaKey || e.altKey) {
+        return;
+      }
+      if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFocus();
+      } else if (e.key === 'Escape' && focus) {
+        setFocus(false);
+        if (document.fullscreenElement) {
+          void document.exitFullscreen?.().catch(() => {});
+        }
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [focus, toggleFocus]);
+
   return (
-    <div className="pf-app">
+    <div className="pf-app" data-focus={focus ? 'true' : 'false'}>
       <header className="pf-topbar">
         <h1 className="pf-wordmark">PixelForge</h1>
         <span className="pf-ingot" aria-hidden="true" />
         <p className="pf-tagline">Hammer pixels into sprites.</p>
+        <button
+          type="button"
+          className="pf-btn pf-focus-toggle"
+          onClick={toggleFocus}
+          aria-pressed={focus}
+          title="Focus / fullscreen drawing (F)"
+        >
+          Focus ⛶
+        </button>
       </header>
       <main className="pf-workbench" aria-label="Workbench">
         <CanvasStage
@@ -53,12 +103,21 @@ function AppBody() {
           palette={state.palette}
         />
         <div className="pf-dock">
-          <ProjectWorkbench />
           <ColorPalettePanel standalone={false} />
           <LayersPanel />
           <TimelinePanel />
         </div>
       </main>
+      {focus && (
+        <button
+          type="button"
+          className="pf-btn pf-focus-exit"
+          onClick={toggleFocus}
+          title="Exit focus (Esc or F)"
+        >
+          Exit Focus ✕
+        </button>
+      )}
       <CrtOverlay level={renderedCrtLevel} />
     </div>
   );
