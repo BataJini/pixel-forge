@@ -8,6 +8,8 @@ under a bespoke Arcade-CRT aesthetic. No accounts, no server, works offline.
 
 ### ▶ [Try it live](https://batajini.github.io/pixel-forge/)
 
+<img src="screenshots/editor.png" alt="PixelForge editor" width="820" />
+
 ## Features
 
 - **Tools** — pencil, eraser, fill, line, rectangle, ellipse, eyedropper, select, move,
@@ -21,6 +23,11 @@ under a bespoke Arcade-CRT aesthetic. No accounts, no server, works offline.
   and a lossless `.forge` project file; in-browser gallery.
 - **Command palette** (`Ctrl/⌘+K`), full keyboard shortcuts, and a Focus/fullscreen mode.
 - **PWA** — installable and works offline after first load.
+
+<p>
+  <img src="screenshots/command-palette.png" alt="Command palette" width="405" />
+  <img src="screenshots/focus.png" alt="Fullscreen focus mode" width="405" />
+</p>
 
 ## Getting started
 
