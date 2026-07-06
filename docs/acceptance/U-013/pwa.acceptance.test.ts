@@ -2,11 +2,20 @@
 // Targets master-spec §8 (installable, offline). Runs against the production build in
 // dist/ (the objective gate runs `npm run build` first). Browser-level a11y / offline /
 // keyboard-only checks live in e2e/a11y-pwa.spec.ts (Playwright + axe).
-import { describe, it, expect } from 'vitest';
+import { describe, it, expect, beforeAll } from 'vitest';
+import { execSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 const dist = (p: string): string => resolve(process.cwd(), 'dist', p);
+
+// These assertions verify the emitted production build. Vitest may run before the
+// build step (e.g. in CI: test -> build), so produce dist/ on demand if absent.
+beforeAll(() => {
+  if (!existsSync(dist('manifest.webmanifest'))) {
+    execSync('npm run build', { stdio: 'ignore' });
+  }
+}, 180_000);
 
 describe('U-013 held-out acceptance — installable PWA build artifacts', () => {
   it('a service worker is emitted', () => {
