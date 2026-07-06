@@ -90,7 +90,7 @@ src/
 ```
 
 Because `src/core` is DOM-free, the entire drawing engine is unit-testable in plain
-Node — which is exactly how the held-out acceptance suites in `docs/acceptance/`
+Node — which is exactly how the held-out acceptance suites in `tests/acceptance/`
 verify it.
 
 ## Getting started

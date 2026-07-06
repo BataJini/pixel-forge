@@ -1,10 +1,10 @@
 // Held-out acceptance — U-010 Export GIF + spritesheet (+JSON atlas). Builder must NOT edit.
 // Targets master-spec §5 exporters/spritesheet.ts + exporters/gif.ts. Runner: Vitest.
 // Encodes the machine-checkable criteria from docs/acceptance/U-010/criteria.md.
-import { describe, it, expect } from 'vitest';
-import { packFrames } from '../../../src/core/exporters/spritesheet';
-import { encodeGifFromFrames, parseGifInfo } from '../../../src/core/exporters/gif';
+import { describe, expect, it } from 'vitest';
 import { createBuffer, setPixel } from '../../../src/core/buffer';
+import { encodeGifFromFrames, parseGifInfo } from '../../../src/core/exporters/gif';
+import { packFrames } from '../../../src/core/exporters/spritesheet';
 import type { Frame, Layer, RGBA } from '../../../src/core/types';
 
 const RED: RGBA = [255, 0, 0, 255];
@@ -50,7 +50,9 @@ describe('U-010 held-out acceptance — spritesheet packing', () => {
     }
 
     // durations carried through
-    meta.frames.forEach((r, i) => expect(r.duration).toBe(100 + i));
+    meta.frames.forEach((r, i) => {
+      expect(r.duration).toBe(100 + i);
+    });
 
     // rects are pairwise non-overlapping
     for (let i = 0; i < meta.frames.length; i++) {

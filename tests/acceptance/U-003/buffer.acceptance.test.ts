@@ -1,15 +1,19 @@
 // Held-out acceptance — U-003 canvas engine core. Builder must NOT edit.
 // Targets the exact contracts in master-spec §5. Runner: Vitest.
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
+import { composite, createBuffer, dirtyRect, getPixel, setPixel } from '../../../src/core/buffer';
 import { hexToRgba, rgbaToHex } from '../../../src/core/color';
-import {
-  createBuffer, getPixel, setPixel, composite, dirtyRect,
-} from '../../../src/core/buffer';
 import type { Layer, PixelBuffer, RGBA } from '../../../src/core/types';
 
 const layer = (buffer: PixelBuffer, over: Partial<Layer> = {}): Layer => ({
-  id: 'l', name: 'l', visible: true, locked: false, opacity: 100,
-  blend: 'normal', buffer, ...over,
+  id: 'l',
+  name: 'l',
+  visible: true,
+  locked: false,
+  opacity: 100,
+  blend: 'normal',
+  buffer,
+  ...over,
 });
 
 describe('color round-trip', () => {
@@ -28,7 +32,8 @@ describe('color round-trip', () => {
 describe('buffer create/get/set', () => {
   it('creates a fully transparent buffer', () => {
     const b = createBuffer(4, 3);
-    expect(b.w).toBe(4); expect(b.h).toBe(3);
+    expect(b.w).toBe(4);
+    expect(b.h).toBe(3);
     expect(b.data.length).toBe(4 * 3 * 4);
     expect(getPixel(b, 0, 0)).toEqual([0, 0, 0, 0]);
   });

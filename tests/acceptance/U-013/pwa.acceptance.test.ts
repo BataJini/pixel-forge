@@ -2,10 +2,11 @@
 // Targets master-spec §8 (installable, offline). Runs against the production build in
 // dist/ (the objective gate runs `npm run build` first). Browser-level a11y / offline /
 // keyboard-only checks live in e2e/a11y-pwa.spec.ts (Playwright + axe).
-import { describe, it, expect, beforeAll } from 'vitest';
+
 import { execSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { beforeAll, describe, expect, it } from 'vitest';
 
 const dist = (p: string): string => resolve(process.cwd(), 'dist', p);
 

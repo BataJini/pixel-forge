@@ -1,7 +1,7 @@
 // Held-out acceptance — U-012 App shell (command palette fuzzy search). Builder must NOT edit.
 // Targets master-spec §3.7 command palette. Runner: Vitest (the menu/shortcut wiring
 // is additionally exercised by e2e/shell.spec.ts under Playwright).
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { fuzzyRank } from '../../../src/ui/shell/fuzzy';
 
 interface Cmd {

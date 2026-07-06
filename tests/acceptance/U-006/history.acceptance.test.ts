@@ -1,8 +1,8 @@
 // Held-out acceptance — U-006 history. Builder must NOT edit.
 // Targets master-spec §5 history.ts. Runner: Vitest.
-import { describe, it, expect } from 'vitest';
-import { createBuffer, setPixel, getPixel } from '../../../src/core/buffer';
-import { makePatch, applyPatch } from '../../../src/core/history';
+import { describe, expect, it } from 'vitest';
+import { createBuffer, getPixel, setPixel } from '../../../src/core/buffer';
+import { applyPatch, makePatch } from '../../../src/core/history';
 import type { RGBA } from '../../../src/core/types';
 
 const C: RGBA = [255, 106, 26, 255];

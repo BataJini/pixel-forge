@@ -6,10 +6,10 @@
 //   3. merge-down of B onto A yields a composite equal to compositing [A, B].
 //   4. flatten reduces to a single layer whose buffer equals the full composite.
 //   5. Layer opacity scales its contribution (0% invisible, 100% full).
-import { describe, it, expect } from 'vitest';
-import { createBuffer, setPixel, getPixel, composite } from '../../../src/core/buffer';
-import { setVisible, moveLayer, setOpacity, mergeDown, flatten } from '../../../src/core/layers';
-import type { Layer, RGBA, PixelBuffer } from '../../../src/core/types';
+import { describe, expect, it } from 'vitest';
+import { composite, createBuffer, getPixel, setPixel } from '../../../src/core/buffer';
+import { flatten, mergeDown, moveLayer, setOpacity, setVisible } from '../../../src/core/layers';
+import type { Layer, PixelBuffer, RGBA } from '../../../src/core/types';
 
 const RED: RGBA = [255, 0, 0, 255];
 const BLUE: RGBA = [0, 0, 255, 255];

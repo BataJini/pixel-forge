@@ -1,8 +1,14 @@
 // Held-out acceptance — U-004 drawing tools. Builder must NOT edit.
 // Targets master-spec §5 buffer ops. Runner: Vitest.
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import {
-  createBuffer, getPixel, setPixel, floodFill, drawLine, drawRect, drawEllipse,
+  createBuffer,
+  drawEllipse,
+  drawLine,
+  drawRect,
+  floodFill,
+  getPixel,
+  setPixel,
 } from '../../../src/core/buffer';
 import type { RGBA } from '../../../src/core/types';
 
@@ -32,11 +38,13 @@ describe('drawRect', () => {
     expect(getPixel(b, 1, 1)).toEqual(RED); // corner
     expect(getPixel(b, 4, 4)).toEqual(RED); // opposite corner
     expect(getPixel(b, 1, 4)).toEqual(RED);
-    expect(opaque(b, 2, 2)).toBe(false);    // interior empty
+    expect(opaque(b, 2, 2)).toBe(false); // interior empty
   });
   it('fill mode fills the interior', () => {
-    const b = drawRect(createBuffer(6, 6), { x: 1, y: 1, w: 4, h: 4 }, RED,
-      { fill: true, fillColor: RED });
+    const b = drawRect(createBuffer(6, 6), { x: 1, y: 1, w: 4, h: 4 }, RED, {
+      fill: true,
+      fillColor: RED,
+    });
     expect(getPixel(b, 2, 2)).toEqual(RED);
     expect(getPixel(b, 3, 3)).toEqual(RED);
   });

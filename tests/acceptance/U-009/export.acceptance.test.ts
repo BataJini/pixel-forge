@@ -1,6 +1,6 @@
 // Held-out acceptance — U-009 PNG/SVG export core. Builder must NOT edit.
 // Targets master-spec §5 exporters. Runner: Vitest (Browser Mode for canvas parts).
-import { describe, it, expect } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { createBuffer, setPixel } from '../../../src/core/buffer';
 import { bufferToSvg } from '../../../src/core/exporters/svg';
 import type { RGBA } from '../../../src/core/types';
