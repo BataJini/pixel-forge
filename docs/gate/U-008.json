@@ -1,9 +1,0 @@
-{
-  "unit": "U-008",
-  "ranCommands": true,
-  "buildExit": 0,
-  "testExit": 0,
-  "artifactsPresent": true,
-  "rewardHackFlags": [],
-  "evidence": "Verified in builder worktree C:/Users/bata/Projects/pixel-forge/.claude/worktrees/wf_341eca87-03f-2 (identified via `git worktree list` + `git status`: untracked src/core/frames.ts, src/state/frameStore.ts, src/ui/frames/ [TimelinePanel/OnionGhosts/FrameThumb/FramesProvider/useFramePlayback], e2e/frames.spec.ts; modified src/core/index.ts, src/state/index.ts, src/ui/App.tsx, vite.config.ts). `npm run build` (tsc -b && vite build) => exit 0, dist/index.html + assets emitted (built in 1.16s). `npm test` (vitest run) => exit 0: Test Files 35 passed (35), Tests 523 passed (523). Artifacts confirmed present in worktree: frames.ts, frameStore.ts, TimelinePanel.tsx, OnionGhosts.tsx, useFramePlayback.ts, and dist build output. Reward-hack scan of the U-008 diff: no .skip/.only/xit/todo/fails; frames.test.ts + frameStore.test.ts cover all four criteria (layer-adds-to-every-frame with distinct buffers, frame add/duplicate-deepcopy/delete-guard/reorder, playback order+timing from durationMs/fps incl ping-pong, onion N-prev/N-next never-current with clamping) plus undo/redo, immutability, and composite cache with strong real assertions; vite.config.ts change only ADDS the docs/acceptance/U-008 include glob (activates held-out tests), no exclusions/weakening. NOTE: no held-out acceptance test file exists in docs/acceptance/U-008/ (only criteria.md); the U-008 acceptance glob matched zero files, so no builder-protected suite executed. This is a factory acceptance-authoring gap, not a builder reward-hack (nothing was deleted) and criteria.md lists no required artifact file; gate criteria (build=0, test=0, artifacts present, no reward-hack) all satisfied."
-}

@@ -525,6 +525,7 @@ export function CanvasStage({ paintColor, indexed, palette }: CanvasStageProps =
   // Shell shortcuts (U-012): Ctrl/Cmd+K palette, `?` help, +/- zoom. Kept separate
   // from attachKeyboard (which owns the drawing bindings) and reads refs, so the
   // one-time listener stays correct across renders.
+  // biome-ignore lint/correctness/useExhaustiveDependencies: intentional one-time window listener; applyZoom reads refs only
   useEffect(() => {
     const onKey = (e: KeyboardEvent): void => {
       if (isTextTarget(e.target)) {
@@ -554,7 +555,7 @@ export function CanvasStage({ paintColor, indexed, palette }: CanvasStageProps =
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
     // applyZoom only reads refs + stable setters, so the mount-time closure is safe.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    // biome-ignore lint/correctness/useExhaustiveDependencies: intentional one-time window listener; applyZoom reads refs only
   }, []);
 
   // The shared command list drives BOTH the menu bar and the Ctrl+K palette, so a
@@ -562,22 +563,116 @@ export function CanvasStage({ paintColor, indexed, palette }: CanvasStageProps =
   // refs at call time (session/history are set in the mount effect).
   const commands: PfCommand[] = [
     { id: 'file.export', title: 'Export…', group: 'File', run: () => setExportOpen(true) },
-    { id: 'file.clear', title: 'Clear Canvas', group: 'File', run: () => sessionRef.current?.replaceBufferWithHistory(createBuffer(ART_W, ART_H), 'Clear') },
-    { id: 'edit.undo', title: 'Undo', group: 'Edit', shortcut: 'Ctrl+Z', disabled: !hist?.canUndo, run: () => historyRef.current?.undo() },
-    { id: 'edit.redo', title: 'Redo', group: 'Edit', shortcut: 'Ctrl+Shift+Z', disabled: !hist?.canRedo, run: () => historyRef.current?.redo() },
-    { id: 'edit.selectAll', title: 'Select All', group: 'Edit', shortcut: 'Ctrl+A', run: () => sessionRef.current?.selectAllPixels() },
-    { id: 'edit.deselect', title: 'Deselect', group: 'Edit', shortcut: 'Esc', run: () => sessionRef.current?.clearSelection() },
-    { id: 'edit.copy', title: 'Copy', group: 'Edit', shortcut: 'Ctrl+C', disabled: !canCopy, run: () => sessionRef.current?.copySelection() },
-    { id: 'edit.cut', title: 'Cut', group: 'Edit', shortcut: 'Ctrl+X', disabled: !canCopy, run: () => sessionRef.current?.cut() },
-    { id: 'edit.paste', title: 'Paste', group: 'Edit', shortcut: 'Ctrl+V', run: () => sessionRef.current?.paste() },
-    { id: 'edit.swap', title: 'Swap Colors', group: 'Edit', shortcut: 'X', run: () => sessionRef.current?.swapColors() },
-    { id: 'view.zoomIn', title: 'Zoom In', group: 'View', shortcut: '+', run: () => applyZoom((z) => nextZoom(z, 1)) },
-    { id: 'view.zoomOut', title: 'Zoom Out', group: 'View', shortcut: '−', run: () => applyZoom((z) => nextZoom(z, -1)) },
-    { id: 'view.zoomReset', title: 'Reset Zoom (100%)', group: 'View', run: () => applyZoom(() => 1) },
+    {
+      id: 'file.clear',
+      title: 'Clear Canvas',
+      group: 'File',
+      run: () => sessionRef.current?.replaceBufferWithHistory(createBuffer(ART_W, ART_H), 'Clear'),
+    },
+    {
+      id: 'edit.undo',
+      title: 'Undo',
+      group: 'Edit',
+      shortcut: 'Ctrl+Z',
+      disabled: !hist?.canUndo,
+      run: () => historyRef.current?.undo(),
+    },
+    {
+      id: 'edit.redo',
+      title: 'Redo',
+      group: 'Edit',
+      shortcut: 'Ctrl+Shift+Z',
+      disabled: !hist?.canRedo,
+      run: () => historyRef.current?.redo(),
+    },
+    {
+      id: 'edit.selectAll',
+      title: 'Select All',
+      group: 'Edit',
+      shortcut: 'Ctrl+A',
+      run: () => sessionRef.current?.selectAllPixels(),
+    },
+    {
+      id: 'edit.deselect',
+      title: 'Deselect',
+      group: 'Edit',
+      shortcut: 'Esc',
+      run: () => sessionRef.current?.clearSelection(),
+    },
+    {
+      id: 'edit.copy',
+      title: 'Copy',
+      group: 'Edit',
+      shortcut: 'Ctrl+C',
+      disabled: !canCopy,
+      run: () => sessionRef.current?.copySelection(),
+    },
+    {
+      id: 'edit.cut',
+      title: 'Cut',
+      group: 'Edit',
+      shortcut: 'Ctrl+X',
+      disabled: !canCopy,
+      run: () => sessionRef.current?.cut(),
+    },
+    {
+      id: 'edit.paste',
+      title: 'Paste',
+      group: 'Edit',
+      shortcut: 'Ctrl+V',
+      run: () => sessionRef.current?.paste(),
+    },
+    {
+      id: 'edit.swap',
+      title: 'Swap Colors',
+      group: 'Edit',
+      shortcut: 'X',
+      run: () => sessionRef.current?.swapColors(),
+    },
+    {
+      id: 'view.zoomIn',
+      title: 'Zoom In',
+      group: 'View',
+      shortcut: '+',
+      run: () => applyZoom((z) => nextZoom(z, 1)),
+    },
+    {
+      id: 'view.zoomOut',
+      title: 'Zoom Out',
+      group: 'View',
+      shortcut: '−',
+      run: () => applyZoom((z) => nextZoom(z, -1)),
+    },
+    {
+      id: 'view.zoomReset',
+      title: 'Reset Zoom (100%)',
+      group: 'View',
+      run: () => applyZoom(() => 1),
+    },
     { id: 'view.zoomFit', title: 'Fit to Screen', group: 'View', run: zoomFit },
-    ...TOOLS.map((t): PfCommand => ({ id: `tool.${t.id}`, title: `Tool: ${t.label}`, group: 'Tools', shortcut: t.key, run: () => sessionRef.current?.setTool(t.id) })),
-    { id: 'help.shortcuts', title: 'Keyboard Shortcuts', group: 'Help', shortcut: '?', run: () => setHelpOpen(true) },
-    { id: 'help.palette', title: 'Command Palette', group: 'Help', shortcut: 'Ctrl+K', run: () => setPaletteOpen(true) },
+    ...TOOLS.map(
+      (t): PfCommand => ({
+        id: `tool.${t.id}`,
+        title: `Tool: ${t.label}`,
+        group: 'Tools',
+        shortcut: t.key,
+        run: () => sessionRef.current?.setTool(t.id),
+      }),
+    ),
+    {
+      id: 'help.shortcuts',
+      title: 'Keyboard Shortcuts',
+      group: 'Help',
+      shortcut: '?',
+      run: () => setHelpOpen(true),
+    },
+    {
+      id: 'help.palette',
+      title: 'Command Palette',
+      group: 'Help',
+      shortcut: 'Ctrl+K',
+      run: () => setPaletteOpen(true),
+    },
   ];
 
   return (
@@ -899,7 +994,11 @@ export function CanvasStage({ paintColor, indexed, palette }: CanvasStageProps =
         title="pixelforge"
       />
 
-      <CommandPalette open={paletteOpen} commands={commands} onClose={() => setPaletteOpen(false)} />
+      <CommandPalette
+        open={paletteOpen}
+        commands={commands}
+        onClose={() => setPaletteOpen(false)}
+      />
       <HelpOverlay open={helpOpen} onClose={() => setHelpOpen(false)} />
     </section>
   );

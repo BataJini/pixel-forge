@@ -54,27 +54,26 @@ export function MenuBar({ commands }: MenuBarProps) {
             {g}
           </button>
           {open === g && (
-            <ul className="pf-menubar__menu" role="menu" aria-label={g}>
+            <div className="pf-menubar__menu" role="menu" aria-label={g}>
               {commands
                 .filter((c) => c.group === g)
                 .map((c) => (
-                  <li key={c.id} role="none">
-                    <button
-                      type="button"
-                      role="menuitem"
-                      className="pf-menubar__item"
-                      disabled={c.disabled}
-                      onClick={() => {
-                        setOpen(null);
-                        c.run();
-                      }}
-                    >
-                      <span className="pf-menubar__item-title">{c.title}</span>
-                      {c.shortcut && <kbd className="pf-menubar__kbd">{c.shortcut}</kbd>}
-                    </button>
-                  </li>
+                  <button
+                    key={c.id}
+                    type="button"
+                    role="menuitem"
+                    className="pf-menubar__item"
+                    disabled={c.disabled}
+                    onClick={() => {
+                      setOpen(null);
+                      c.run();
+                    }}
+                  >
+                    <span className="pf-menubar__item-title">{c.title}</span>
+                    {c.shortcut && <kbd className="pf-menubar__kbd">{c.shortcut}</kbd>}
+                  </button>
                 ))}
-            </ul>
+            </div>
           )}
         </div>
       ))}

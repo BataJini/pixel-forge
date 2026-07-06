@@ -1,6 +1,7 @@
 // e2e — U-013 a11y (axe), keyboard operability, and PWA offline boot (Playwright).
-import { test, expect } from '@playwright/test';
+
 import { readFileSync } from 'node:fs';
+import { expect, test } from '@playwright/test';
 
 const AXE = readFileSync('node_modules/axe-core/axe.min.js', 'utf8');
 

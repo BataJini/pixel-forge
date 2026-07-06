@@ -91,12 +91,12 @@
 }
 
 /* Focus / fullscreen drawing mode — hide the chrome + dock, canvas fills. */
-.pf-app[data-focus='true'] .pf-topbar,
-.pf-app[data-focus='true'] .pf-dock {
+.pf-app[data-focus="true"] .pf-topbar,
+.pf-app[data-focus="true"] .pf-dock {
   display: none;
 }
 
-.pf-app[data-focus='true'] .pf-workbench {
+.pf-app[data-focus="true"] .pf-workbench {
   padding: var(--space-2);
 }
 

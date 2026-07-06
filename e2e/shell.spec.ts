@@ -1,5 +1,5 @@
 // e2e — U-012 app shell: menu bar + Ctrl/Cmd+K command palette (Playwright).
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test.describe('U-012 app shell', () => {
   test('command palette opens on Ctrl+K, fuzzy-finds Export, and runs it', async ({ page }) => {

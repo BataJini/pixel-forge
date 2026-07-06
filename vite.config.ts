@@ -26,7 +26,8 @@ export default defineConfig({
       manifest: {
         name: 'PixelForge',
         short_name: 'PixelForge',
-        description: 'A fast, fully client-side browser pixel-art editor. Hammer pixels into sprites.',
+        description:
+          'A fast, fully client-side browser pixel-art editor. Hammer pixels into sprites.',
         theme_color: '#06070c',
         background_color: '#06070c',
         display: 'standalone',
@@ -35,7 +36,12 @@ export default defineConfig({
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'icons/maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          {
+            src: 'icons/maskable-512.png',
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'maskable',
+          },
         ],
       },
     }),

@@ -95,12 +95,13 @@ export function CommandPalette({ open, commands, onClose }: CommandPaletteProps)
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={onKeyDown}
         />
-        <ul className="pf-cmdk__list" role="listbox" aria-label="Commands">
-          {ranked.length === 0 && <li className="pf-cmdk__empty">No matching command</li>}
+        <div className="pf-cmdk__list" role="listbox" aria-label="Commands">
+          {ranked.length === 0 && <div className="pf-cmdk__empty">No matching command</div>}
           {ranked.map(({ item }, i) => (
-            <li
+            <div
               key={item.id}
               role="option"
+              tabIndex={-1}
               aria-selected={i === active}
               className={`pf-cmdk__item${i === active ? ' is-active' : ''}`}
               onMouseMove={() => setActive(i)}
@@ -112,9 +113,9 @@ export function CommandPalette({ open, commands, onClose }: CommandPaletteProps)
               <span className="pf-cmdk__group">{item.group}</span>
               <span className="pf-cmdk__title">{item.title}</span>
               {item.shortcut && <kbd className="pf-cmdk__kbd">{item.shortcut}</kbd>}
-            </li>
+            </div>
           ))}
-        </ul>
+        </div>
       </div>
     </div>
   );

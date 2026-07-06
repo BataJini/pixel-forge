@@ -1,9 +1,0 @@
-{
-  "notice": "Local storage is full. Export a project to a file or delete saved projects, then try again.",
-  "saveState": "Save failed",
-  "px": {
-    "w": 32,
-    "h": 32
-  },
-  "pass": true
-}
