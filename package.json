@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "PixelForge — a fast, beautiful, fully client-side browser pixel-art editor. Hammer pixels into sprites.",
+  "description": "PixelForge — a fast, fully client-side browser pixel-art editor. Hammer pixels into sprites.",
   "license": "MIT",
   "engines": {
     "node": ">=22.12.0"
@@ -12,17 +12,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
-    "test": "vitest run",
-    "test:watch": "vitest",
-    "test:browser": "vitest run --config vitest.browser.config.ts",
-    "test:e2e": "playwright test",
-    "coverage": "vitest run --coverage",
-    "typecheck": "tsc -b",
-    "fonts:vendor": "node scripts/vendor-fonts.mjs",
-    "lint": "biome check .",
-    "lint:fix": "biome check --write .",
-    "format": "biome format --write .",
-    "format:check": "biome format ."
+    "typecheck": "tsc -b"
   },
   "dependencies": {
     "browser-fs-access": "^0.38.0",
@@ -32,23 +22,12 @@
     "react-dom": "^19.2.7"
   },
   "devDependencies": {
-    "@biomejs/biome": "^2.5.2",
-    "@fontsource/pixelify-sans": "^5.2.7",
-    "@fontsource/press-start-2p": "^5.2.7",
-    "@fontsource/silkscreen": "^5.2.8",
-    "@fontsource/vt323": "^5.2.7",
-    "@playwright/test": "^1.61.1",
     "@types/node": "^24.10.0",
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.2.0",
-    "@vitest/browser-playwright": "^4.1.9",
-    "@vitest/coverage-v8": "^4.1.9",
-    "axe-core": "^4.12.1",
-    "playwright": "^1.61.1",
     "typescript": "~5.9.3",
     "vite": "^7.3.6",
-    "vite-plugin-pwa": "^1.3.0",
-    "vitest": "^4.1.9"
+    "vite-plugin-pwa": "^1.3.0"
   }
 }

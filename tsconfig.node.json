@@ -2,9 +2,7 @@
   "compilerOptions": {
     "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.node.tsbuildinfo",
     "target": "ES2023",
-    // DOM is needed for the browser-context callbacks passed to Playwright's
-    // `page.evaluate` in the e2e suite (e.g. reading canvas pixels).
-    "lib": ["ES2023", "DOM"],
+    "lib": ["ES2023"],
     "module": "ESNext",
     "moduleResolution": "bundler",
     "types": ["node"],
@@ -22,5 +20,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.ts", "vitest.browser.config.ts", "playwright.config.ts", "e2e"]
+  "include": ["vite.config.ts"]
 }

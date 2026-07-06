@@ -3,49 +3,25 @@ node_modules/
 
 # Build output
 dist/
-dist-ssr/
-
-# Test / coverage artifacts
-coverage/
-playwright-report/
-playwright/.cache/
-test-results/
-blob-report/
-# Vitest Browser Mode generated artifacts (failure screenshots / attachments)
-.vitest-attachments/
-**/__screenshots__/
 
 # TypeScript incremental build info
 *.tsbuildinfo
 .tmp/
 
-# Environment (keep .env.example tracked)
+# Environment
 .env
 .env.*
-!.env.example
-
-# Codex advisory scratch (never committed)
-.codex-out.md
-
-# Project Factory machine-local state (build worktrees, per-unit locks).
-# Each worktree carries its own biome.json; committing/scanning them breaks
-# `biome check .` with a nested-root error. Never committed.
-.claude/
-.factory.lock
 
 # Logs
 *.log
 npm-debug.log*
 
-# Editor / OS
+# Editor / OS / Vite cache
+.vite/
 .DS_Store
 Thumbs.db
 *.local
-.vite/
 
-# Factory build-process artifacts (not part of the shipped project)
-docs/qa/
-docs/gate/
-docs/reviews/
-docs/state.json
-docs/trace.jsonl
+# Machine-local agent build worktrees (never committed)
+.claude/
+.factory.lock
